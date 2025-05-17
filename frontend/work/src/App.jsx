@@ -6,12 +6,12 @@ import Login from './components/Auth/login'
 import SignUp from './components/Auth/SignUp'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState();
 
   return (
     <>
      {/* <Login/> */}
-     <SignUp/>
+     {/* <SignUp/> */}
      
     </>
   )
