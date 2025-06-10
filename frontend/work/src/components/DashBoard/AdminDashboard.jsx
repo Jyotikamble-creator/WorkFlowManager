@@ -9,6 +9,7 @@ const AdminDashboard = () => {
   const [newTask, setNewTask] = useState({ title: "", description: "", assignedTo: "" });
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
     const fetchTasks = async () => {
       const userResponse = await axios.get('', {
 
