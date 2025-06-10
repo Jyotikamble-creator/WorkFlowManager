@@ -3,7 +3,7 @@ const mongoose=require("mongoose");
 const express=require("express");
 const router=express.Router();
 const User=require("../models/User")
-const Auth=require("../middleware/auth")
+const auth=require("../middleware/auth")
 
 router.get('/',auth,async(req,res)=>{
     const {role}=req.user
