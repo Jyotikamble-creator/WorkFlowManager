@@ -1,17 +1,36 @@
 import React,{useState} from 'react'
-
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 const Login = () => {
 
     const [email,setEmail]=useState("")
     const [password,setPassword]=useState("")
+    const [error,setError]=useState("")
+
+    const navigate=useNavigate()
 
     // two way banding
-    const submitHandler=(e)=>{
-        e.preventDefault()
+    const submitHandler= async(e)=>{
+e.preventDefault()
         console.log("Login")
 
-        setEmail("")
+        try {
+            
+            const res=await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`,{email,password})
+               localStorage.setItem("token",res.data.token) 
+            
+               setEmail("")
         setPassword("")
+                setError("")
+                toast.success("Login Successful")
+                navigate("/dashboard")
+        } catch (error) {
+            setError("Invalid Credentials")
+        }
+        
+
+        
     }
 
     return (
@@ -29,7 +48,9 @@ const Login = () => {
                     onChange={(e)=>setPassword(e.target.value)}
                     
                     className=' text-blue-600 text-xl outline-none border-2 bg-transparent rounded-full border-green-300  py-2 px-5 ' type="password" placeholder='Enter Your Password' required></input>
+
                     <button className='  text-blue-600 text-xl outlinenone border-none  rounded-full bg-green-300  py-2 px-5 mt-5 '>Login</button>
+                    {error && <p className='text-red-500'>{error}</p>}
                     <p className='text-white'>Don't have an account? <a href="/SignUp" className='text-blue-500'>Sign Up</a></p>
                 </form>
             </div>
