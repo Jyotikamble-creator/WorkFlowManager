@@ -8,21 +8,17 @@ const router = require("express").Router();
 
 // Get/read all tasks
 router.get('/:id', auth, async (req, res) => {
-  const task = await Task.findById(req.params.id).populate('assignedTo createdBy', 'username');
+  const task = await Task.findById(req.params.id).populate('assignedTo createdBy', 'email');
   res.json(task);
 });
 
 
-router.get('/',auth,async(req,res)=>{
-    const tasks=await Task.findbyId(req.params.id).populate('assignedTo','createdBy','username')
-    return json(tasks)
-})
 
 // create a new task
 router.post('/',auth,async(req,res)=>{
-    const task=new Task(req.body,createdBy=req.user._id)
+    const task=new Task({...req.body,createdBy:req.user._id})
     await task.save()
-    return json(task)
+    res. json(task)
 })
 
 // Update a task

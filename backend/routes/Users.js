@@ -9,7 +9,7 @@ router.get('/',auth,async(req,res)=>{
     const {role}=req.user
     const query=role?{role}:{};
     const users=await User.find(query).select("-password")
-    return json(users)
+    res. json(users)
 })
 
 module.exports=router
