@@ -5,9 +5,8 @@ const taskSchema=new mongoose.Schema({
     description:String,
     assignedTo:{type:mongoose.Schema.Types.ObjectId,ref:"User"},
     createdBy:{type:mongoose.Schema.Types.ObjectId,ref:"User"},
-    status:{type:String,enum:["pending","inprogress","completed"],default:"pending"}
-    
-},{timeStamps:true})
+    status:{type:String,enum:["pending","inprogress","completed"],default:"pending"}},
+    {timestamps:true})
 
 module.exports=mongoose.model("Task",taskSchema)
 
