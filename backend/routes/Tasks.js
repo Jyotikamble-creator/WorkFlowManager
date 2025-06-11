@@ -6,11 +6,21 @@ const { create } = require("domain");
 const router = require("express").Router();
 
 
-// Get/read all tasks
+// Get/read all tasks by id
 router.get('/:id', auth, async (req, res) => {
-  const task = await Task.findById(req.params.id).populate('assignedTo createdBy', 'email');
+  const task = await Task.findById(req.params.id)
+  .populate('assignedTo ', 'email')
+  .populate('createdBy', 'email');
   res.json(task);
 });
+
+// get single task
+router.get('/', auth, async (req, res) => {
+    const tasks=await Task.find()
+    .populate('assignedTo ', 'email')
+    .populate('createdBy', 'email');
+    res.json(tasks);
+})
 
 
 
@@ -18,7 +28,8 @@ router.get('/:id', auth, async (req, res) => {
 router.post('/',auth,async(req,res)=>{
     const task=new Task({...req.body,createdBy:req.user._id})
     await task.save()
-    res. json(task)
+    
+    res.status(201).json(task)
 })
 
 // Update a task
@@ -42,10 +53,4 @@ res.json(task);
 module.exports=router;
 
 
-// comments: [
-//   {
-//     author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-//     text: String,
-//     timestamp: { type: Date, default: Date.now }
-//   }
-// ]
+
