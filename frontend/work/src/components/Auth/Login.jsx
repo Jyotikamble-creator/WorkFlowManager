@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
-    
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
