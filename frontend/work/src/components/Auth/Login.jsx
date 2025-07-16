@@ -1,53 +1,60 @@
-import React,{useState} from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+
 const Login = () => {
 
-    const [email,setEmail]=useState("")
-    const [password,setPassword]=useState("")
-    const [error,setError]=useState("")
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [error, setError] = useState("")
 
-    const navigate=useNavigate()
+    const navigate = useNavigate()
 
     // two way banding
-    const submitHandler= async(e)=>{
-e.preventDefault()
+    const submitHandler = async (e) => {
+        e.preventDefault()
         console.log("Login")
 
         try {
-            
-            const res=await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`,{email,password})
-               localStorage.setItem("token",res.data.token) 
-            
-               setEmail("")
-        setPassword("")
-                setError("")
-                toast.success("Login Successful")
-                navigate("/dashboard")
+
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, { email, password })
+            localStorage.setItem("token", res.data.token)
+            localStorage.setItem("user", JSON.stringify(res.data.user))
+
+            setEmail("")
+            setPassword("")
+            setError("")
+            toast.success("Login Successful")
+
+            const role= res.data.user.role
+            navigate(`/${role}`)
         } catch (error) {
             setError("Invalid Credentials")
         }
-        
 
-        
+
+
     }
+
+
+    
 
     return (
         <div className='bg-gray-700 h-screen w-screen flex flex-col justify-center items-center'>
             <div className='text-3xl text-white mb-5 mt-5 p-20  border rounded-4xl border-amber-200'>Welcome
-                <form 
-                onSubmit={(e)=>
-                    submitHandler(e)
-                }
-                className='flex flex-col gap-5 items-center justify-center'>
-                    <input  
-                    onChange={(e)=>setEmail(e.target.value)}
-                    className=' text-blue-600 text-xl outline-none border-2 bg-transparent rounded-full border-green-300  py-2 px-5 ' type="email" placeholder=" Enter Your Email" required ></input>
-                    <input 
-                    onChange={(e)=>setPassword(e.target.value)}
-                    
-                    className=' text-blue-600 text-xl outline-none border-2 bg-transparent rounded-full border-green-300  py-2 px-5 ' type="password" placeholder='Enter Your Password' required></input>
+                <form
+                    onSubmit={(e) =>
+                        submitHandler(e)
+                    }
+                    className='flex flex-col gap-5 items-center justify-center'>
+                    <input
+                        onChange={(e) => setEmail(e.target.value)}
+                        className=' text-blue-600 text-xl outline-none border-2 bg-transparent rounded-full border-green-300  py-2 px-5 ' type="email" placeholder=" Enter Your Email" required ></input>
+                    <input
+                        onChange={(e) => setPassword(e.target.value)}
+
+                        className=' text-blue-600 text-xl outline-none border-2 bg-transparent rounded-full border-green-300  py-2 px-5 ' type="password" placeholder='Enter Your Password' required></input>
 
                     <button className='  text-blue-600 text-xl outlinenone border-none  rounded-full bg-green-300  py-2 px-5 mt-5 '>Login</button>
                     {error && <p className='text-red-500'>{error}</p>}
