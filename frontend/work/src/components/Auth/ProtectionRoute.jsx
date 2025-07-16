@@ -2,19 +2,22 @@ import { Navigate } from "react-router-dom";
 
 const ProtectionRoute = ({ children, role }) => {
     const token = localStorage.getItem("token");
-    const user = JSON.parse(localStorage.getItem("user"));
-
-
-    if (!token||!user) {
-        return <Navigate to="/login"/>
-    
+    let user;
+    // Attempt to parse user from localStorage
+    try {
+        user = JSON.parse(localStorage.getItem("user"));
+    } catch (error) {
+        return <Navigate to="/login" />;
     }
 
+    // user role check
+    if (!token || !user) {
+        return <Navigate to="/login" />
+    }
 
-    if(user.role !== role){
-        return <Navigate to ={`/${user.role}`} />
-
-
+    // navigate to their dashboard based on role
+    if (user.role !== role) {
+        return <Navigate to={`/${user.role}`} />
     }
 
     return children;

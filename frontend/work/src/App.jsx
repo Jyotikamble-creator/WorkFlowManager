@@ -14,11 +14,11 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/p"
+        <Route path="/p"/>
 
-        <Route path="/dashboard" element={<AdminDashboard />} />
-        <Route path="/employee" element={<EmployeeDashboard />} />
-        <Route path="/manager" element={<ManagerDashboard />} />
+        <Route path="/admin" element={<ProtectionRoute role="admin"><AdminDashboard /></ProtectionRoute> }/>
+        <Route path="/employee" element={<ProtectionRoute role="employee"><EmployeeDashboard /> </ProtectionRoute>} />
+        <Route path="/manager" element={<ProtectionRoute role="manager"><ManagerDashboard /></ProtectionRoute>} />
         <Route path="/task/:id" element={<WorkDescription />} />
 
         <Route path ="*" element={<Navigate to="/login" />} />
