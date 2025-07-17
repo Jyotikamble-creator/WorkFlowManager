@@ -6,10 +6,12 @@ const TaskForm = () => {
   const [form, setForm] = useState({ title: '', description: '', assignedTo: '' });
   const navigate = useNavigate();
 
+  // update form state on input change
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // tasks creation
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
@@ -22,11 +24,39 @@ const TaskForm = () => {
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Create Task</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input type="text" name="title" placeholder="Title" onChange={handleChange} className="border p-2 w-full" required />
-        <textarea name="description" placeholder="Description" onChange={handleChange} className="border p-2 w-full" required />
-        <input type="text" name="assignedTo" placeholder="Assign to (user ID)" onChange={handleChange} className="border p-2 w-full" required />
-        <button className="bg-blue-600 text-white px-4 py-2 rounded">Create</button>
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4">
+
+        <input
+          type="text"
+          name="title"
+          placeholder="Title"
+          onChange={handleChange}
+          className="border p-2 w-full" required
+        >
+        </input>
+
+        <textarea
+          name="description"
+          placeholder="Description"
+          onChange={handleChange}
+          className="border p-2 w-full" required
+        >
+        </textarea>
+
+        <input
+          type="text"
+          name="assignedTo"
+          placeholder="Assign to (user ID)"
+          onChange={handleChange}
+          className="border p-2 w-full"
+          required ></input>
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded">
+          Create
+        </button>
+        
       </form>
     </div>
   );

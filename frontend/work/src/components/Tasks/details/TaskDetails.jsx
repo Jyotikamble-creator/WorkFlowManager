@@ -8,6 +8,7 @@ const TaskDetails = () => {
   const [task, setTask] = useState(null);
   const { id } = useParams();
 
+  // read the tasks by id 
   useEffect(() => {
     const fetchTask = async () => {
       const token = localStorage.getItem('token');
