@@ -1,21 +1,32 @@
-const mongoose=require("mongoose");
+const mongoose = require('mongoose');
 
-const taskSchema=new mongoose.Schema({
-    title:String,
-    description:String,
-    assignedTo:{type:mongoose.Schema.Types.ObjectId,ref:"User"},
-    createdBy:{type:mongoose.Schema.Types.ObjectId,ref:"User"},
-    status:{type:String,enum:["pending","inprogress","completed"],default:"pending"}},
-    {timestamps:true})
+// Taskschema defines the structure of a task document in MongoDB
+const TaskSchema = new mongoose.Schema({
+  title: String,
+  description: String,
 
-module.exports=mongoose.model("Task",taskSchema)
+  status: {
+    type: String,
+    enum: ['to do', 'in progress', 'done'],
+    default: 'to do',
+  },
 
+  assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
-const commentSchema = new mongoose.Schema({
-    text: String,
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    timestamp:{ type: Date, default: Date.now }
-})
+  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }], // 🧩 Connects to Comment model
+
+//   keep the track of task history
+  history: [  
+    {
+      action: String,
+      date: { type: Date, default: Date.now },
+      by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    }
+  ]
+}, { timestamps: true });
+
+module.exports = mongoose.model('Task', TaskSchema);
 
 
 
