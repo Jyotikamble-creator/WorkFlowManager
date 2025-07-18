@@ -1,3 +1,5 @@
+// authentication for users
+// this is mongoose schema for user 
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
@@ -16,7 +18,8 @@ const userSchema = new mongoose.Schema({
     enum:["admin",
         "manager",
         "employee"
-    ],required:true
+    ],required:true,
+    default: "employee"
    }
 });
 
