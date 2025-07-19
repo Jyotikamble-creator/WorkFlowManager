@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const CommentSchema = new mongoose.Schema({
     // stores  id of task
-    taskID:{type: mongoose.Schema.Types.ObjectId, ref: 'Task', required: true},
+    taskId: { type: mongoose.Schema.Types.ObjectId, ref: 'Task', required: true },
     // actual comment text
     text: { type: String, required: true },
     // stores id of user who created the comment(whi had commented)

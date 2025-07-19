@@ -1,11 +1,9 @@
 module.exports = function (...allowedRoles) {
   return (req, res, next) => {
     const userRole = req.user?.role;
-
     if (!allowedRoles.includes(userRole)) {
-      return res.status(403).json({ message: "Access denied: insufficient permissions" });
+      return res.status(403).json({ message: "Forbidden - insufficient role" });
     }
-
-    next(); //  Move this inside the function block
+    next(); //  Move inside the function
   };
 };
