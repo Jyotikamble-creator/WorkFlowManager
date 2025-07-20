@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const CommentSchema = new mongoose.Schema({
+const commentSchema = new mongoose.Schema({
     // stores  id of task
     taskId: { type: mongoose.Schema.Types.ObjectId, ref: 'Task', required: true },
     // actual comment text
@@ -11,7 +11,7 @@ const CommentSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.Model.Comment|| mongoose.model("Comment", CommentSchema);
+module.exports = mongoose.Model.Comment|| mongoose.model("Comment", commentSchema);
 
 
 

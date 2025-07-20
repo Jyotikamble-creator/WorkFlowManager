@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 // Taskschema defines the structure of a task document in MongoDB
-const TaskSchema = new mongoose.Schema({
+const taskSchema = new mongoose.Schema({
   title: String,
   description: String,
 
@@ -26,7 +26,7 @@ const TaskSchema = new mongoose.Schema({
   ]
 }, { timestamps: true });
 
-module.exports = mongoose.model.Task || mongoose.model('Task', TaskSchema);
+module.exports = mongoose.model.Task || mongoose.model('Task', taskSchema);
 
 
 
