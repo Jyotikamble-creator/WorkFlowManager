@@ -33,7 +33,7 @@ const SignUp = () => {
         <form onSubmit={submitHandler} className='flex flex-col gap-5 items-center justify-center'>
 
           <input
-            onChange={e => setUsername(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
             className='text-blue-600 text-xl outline-none border-2 bg-transparent rounded-full border-green-300 py-2 px-5'
             type="text"
             value={email}

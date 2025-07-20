@@ -60,4 +60,4 @@ exports.login = async (req, res) => {
   }
 };
 
-module.exports = mongoose.models.User || mongoose.model('User', userSchema); // ✅ GOOD
+
