@@ -22,3 +22,5 @@ exports.getUserById = async (req, res) => {
     res.status(500).json({ message: 'Server error while retrieving user' });
   }
 };
+
+module.exports = mongoose.models.User || mongoose.model('User', userSchema); // ✅ GOOD
