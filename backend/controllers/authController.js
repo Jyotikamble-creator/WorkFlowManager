@@ -1,4 +1,4 @@
-const User = require('../models/User'); // Make sure your file is named 'User.js' (capitalized)
+const User = require('../models/User.js'); // Make sure your file is named 'User.js' (capitalized)
 const bcrypt = require('bcrypt'); // Prefer 'bcrypt' (native bindings and better maintenance)
 const jwt = require('jsonwebtoken');
 

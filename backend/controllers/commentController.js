@@ -1,5 +1,5 @@
-const Comment = require('../models/comment');
-const Task = require('../models/task');
+const Comment = require('../models/Comment');
+const Task = require('../models/Task');
 
 // Add a comment to a task
 exports.addComment = async (req, res) => {
