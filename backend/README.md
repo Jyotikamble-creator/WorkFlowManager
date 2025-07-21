@@ -34,6 +34,12 @@ A full-stack  Workflow Management System built with  Express.js with MongoDB on 
 - Task activity log with timestamps and user actions
 
 ---
+# 🧱 Tech Stack
+
+---
+# 🗂️ Folder Structure
+
+---
 
 # 🧾 Environment Variables
 
@@ -74,3 +80,9 @@ npm install
 npm run dev
 ```
 Frontend app runs on: http://localhost:5173
+
+---
+# 📡 API Overview
+
+---
+
