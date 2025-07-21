@@ -32,3 +32,45 @@ A full-stack  Workflow Management System built with  Express.js with MongoDB on 
 - View full comment threads
 
 - Task activity log with timestamps and user actions
+
+---
+
+# 🧾 Environment Variables
+
+.env (at root of backend)
+
+```ini
+MONGODB_URI=your_mongo_connection_string
+JWT_SECRET=your_secret_jwt_key
+PORT=5000
+```
+.env (at root of frontend or client/.env)
+
+```bash
+VITE_API_URL=http://localhost:5000/api
+```
+---
+
+# ⚙️ Installation & Setup
+
+### 1️⃣ Clone the Project
+```bash
+git clone https://github.com/your-username/workflow-management-system.git
+
+cd workflow-management-system
+```
+### 2️⃣ Setup Backend
+```bash
+cd backend
+
+npm install
+
+npm start
+```
+### 3️⃣ Setup Frontend
+```bash
+cd client
+npm install
+npm run dev
+```
+Frontend app runs on: http://localhost:5173
