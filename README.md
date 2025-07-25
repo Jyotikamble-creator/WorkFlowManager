@@ -6,33 +6,33 @@ A full-stack task and workflow management system built with **React.js (Vite)** 
 
 ## 🚀 Features
 
-- 🔐 **Role-Based Authentication** using JWT  
-- 👥 **User Roles:** Admin, Manager, Employee  
-- ✅ **Task Management:** Create, assign, update status  
-- 💬 **Comment System:** Real-time threaded discussions under each task  
-- 📜 **Task History Logs** and submission tracking  
-- 🧾 **File Uploads:** Submit work with attachments  
-- 🔎 **Dashboard Filtering** by task status and user  
-- 📁 **Modular Codebase**: Reusable components and clean folder structure  
-- 🌐 **RESTful API** integration  
-- 🎨 **Tailwind CSS** for responsive and clean UI  
+- 🔐 **Role-Based Authentication** using JWT.  
+- 👥 **User Roles:** Admin, Manager, Employee.  
+- ✅ **Task Management:** Create, assign, update status. 
+- 💬 **Comment System:** Real-time threaded discussions under each task.  
+- 📜 **Task History Logs** and submission tracking.  
+- 🧾 **File Uploads:** Submit work with attachments.  
+- 🔎 **Dashboard Filtering** by task status and user.  
+- 📁 **Modular Architecture**: Reusable components and clean folder structure.  
+- 🌐 **RESTful API** integration.  
+- 🎨 **Tailwind CSS** for responsive and clean UI.  
 
 ---
 ## 🏗️ Tech Stack
 
 ### Frontend:
 
-- React.js (Vite)
-- Tailwind CSS
-- Axios
-- React Router
+- [React.js (Vite)](https://vite.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Axios]()
+- [React Router](https://vite.dev/guide/ssr.html#pre-rendering-ssg)
 
 ### Backend:
-- Node.js
-- Express.js
-- MongoDB + Mongoose
-- JSON Web Tokens (JWT)
-- Multer (for file uploads)
+- [Node.js](https://nodejs.org/en)
+- [Express.js](https://expressjs.com/)
+- [MongoDB + Mongoose](https://www.mongodb.com/products/platform/atlas-database)
+- [JSON Web Tokens (JWT)](https://www.jwt.io/)
+- [Multer (for file uploads)]()
 
 ---
 ## 🔐 Roles & Access
