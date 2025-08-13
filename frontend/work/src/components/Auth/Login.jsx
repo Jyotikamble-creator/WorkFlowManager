@@ -43,6 +43,7 @@ const Login = () => {
         }
 
     }
+    // display login form
 
     return (
         <div className='bg-gray-700 h-screen w-screen flex flex-col justify-center items-center'>
