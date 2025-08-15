@@ -1,11 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+const navigate = useNavigate();
 
-const Navbar = () => {
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
-  };
+const handleLogout = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  navigate('/login');
+
 
   return (
     <nav className="bg-blue-600 text-white px-4 py-3 flex justify-between items-center">
@@ -16,6 +17,6 @@ const Navbar = () => {
       </div>
     </nav>
   );
-};
 
+};
 export default Navbar;

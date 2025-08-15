@@ -1,9 +1,12 @@
 import React from 'react';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
+import { useAuth } from '../../context/AuthContext';
 
-// this will call both the navbar and sibe barr together
-const Layout = ({ children, role }) => {
+const Layout = ({ children }) => {
+  const { user } = useAuth();
+  const role = user?.role;
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
