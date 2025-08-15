@@ -1,7 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
-const Sidebar = ({ role }) => {
+const Sidebar = () => {
+  const { user } = useAuth();
+  const role = user?.role;
+
   return (
     <aside className="w-64 bg-gray-100 h-screen p-4 border-r">
       <h2 className="text-xl font-semibold mb-4">Menu</h2>
@@ -14,5 +18,3 @@ const Sidebar = ({ role }) => {
     </aside>
   );
 };
-
-export default Sidebar;
