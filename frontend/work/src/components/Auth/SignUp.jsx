@@ -21,7 +21,7 @@ const SignUp = () => {
       toast.success("Registration Successful! Please login.");
       navigate("/login");
     } catch (err) {
-      setError(error.response?.data?.message || "Registration failed")
+      setError(err.response?.data?.message || "Registration failed")
     }
 
   };
