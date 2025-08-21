@@ -7,3 +7,5 @@ module.exports = function (...allowedRoles) {
     next(); //  Move inside the function
   };
 };
+
+// This middleware checks if the user's role is allowed to access the route
