@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import api from '../../services/api'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import Layout from '../common/Layout'
+import Layout from '../Common/Layout'
 
 const AdminDashboard = () => {
   const [tasks, setTasks] = useState([]);

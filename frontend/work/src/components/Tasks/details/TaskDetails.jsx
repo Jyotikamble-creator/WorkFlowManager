@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../../services/api';
 import { useParams } from 'react-router-dom';
 import CommentList from './CommentList';
-import HistoryLog from './HistoryLog';
+import HistoryLog from './History';
 
 const TaskDetails = () => {
   const [task, setTask] = useState(null);

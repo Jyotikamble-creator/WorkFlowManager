@@ -1,12 +1,15 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-const navigate = useNavigate();
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
-const handleLogout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  navigate('/login');
+const Navbar = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <nav className="bg-blue-600 text-white px-4 py-3 flex justify-between items-center">
@@ -17,6 +20,6 @@ const handleLogout = () => {
       </div>
     </nav>
   );
-
 };
+
 export default Navbar;

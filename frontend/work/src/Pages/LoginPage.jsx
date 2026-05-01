@@ -1,5 +1,5 @@
 import React from 'react';
-import Login from '../components/auth/Login';
+import Login from '../components/Auth/Login';
 
 // this will visible on broswer because it is page
 const LoginPage = () => {

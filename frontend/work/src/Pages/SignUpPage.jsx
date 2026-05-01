@@ -1,13 +1,13 @@
 import React from 'react';
-import Signup from '../components/auth/Signup';
+import SignUp from '../components/Auth/SignUp';
 
 // this will visible on broswer because it is page
-const SignupPage = () => {
+const SignUpPage = () => {
   return (
     <div className="p-4">
-      <Signup />
+      <SignUp />
     </div>
   );
 };
 
-export default SignupPage;
+export default SignUpPage;
