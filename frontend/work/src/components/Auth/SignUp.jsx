@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { signup as signupService } from '../../services/authServices';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -16,7 +16,7 @@ const SignUp = () => {
     console.log("Sign Up");
 
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, { email, password, role });
+      await signupService({ email, password, role });
       setError("");
       toast.success("Registration Successful! Please login.");
       navigate("/login");

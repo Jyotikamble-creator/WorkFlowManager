@@ -6,9 +6,17 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   const login = (userData) => {
+    // Support both signatures: login(token, user) or login(userData)
+    if (typeof userData === 'string' || typeof userData === 'number') {
+      // called as login(token, user) - not supported here
+      return;
+    }
+
+    // If called with two args (token, user) the caller should pass an object instead.
+    const token = userData.token || localStorage.getItem('token');
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('token', userData.token);
+    if (token) localStorage.setItem('token', token);
   };
 
   const logout = () => {

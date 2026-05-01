@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../../services/api';
 import { useNavigate } from 'react-router-dom';
 
 const TaskForm = () => {
@@ -14,10 +14,7 @@ const TaskForm = () => {
   // tasks creation
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    await axios.post(`${import.meta.env.VITE_BACKEND_URL}/tasks`, form, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    await api.post('/tasks', form);
     navigate(-1);
   };
 

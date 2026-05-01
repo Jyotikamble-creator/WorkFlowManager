@@ -23,4 +23,4 @@ exports.getUserById = async (req, res) => {
   }
 };
 
-module.exports = mongoose.models.User || mongoose.model('User', userSchema); // ✅ GOOD
+// Exporting controller functions via `exports.*` above is sufficient.

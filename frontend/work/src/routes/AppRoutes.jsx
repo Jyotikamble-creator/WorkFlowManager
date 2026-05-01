@@ -1,13 +1,13 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import Login from '../components/auth/Login';
-import SignUp from '../components/auth/Signup';
-import ProtectionRoute from '../components/auth/ProtectionRoute';
+import Login from '../components/Auth/Login';
+import SignUp from '../components/Auth/SignUp';
+import ProtectionRoute from '../components/Auth/ProtectionRoute';
 
-import AdminDashboard from '../components/dashboard/AdminDashboard';
-import EmployeeDashboard from '../components/dashboard/EmployeeDashboard';
-import ManagerDashboard from '../components/dashboard/ManagerDashboard';
-import WorkDescription from '../components/dashboard/WorkDescription';
+import AdminDashboard from '../components/DashBoard/AdminDashboard';
+import EmployeeDashboard from '../components/DashBoard/EmployeeDashboard';
+import ManagerDashboard from '../components/DashBoard/ManagerDashboard';
+import WorkDescription from '../components/DashBoard/WorkDescription';
 
 
 const AppRoutes = () => (

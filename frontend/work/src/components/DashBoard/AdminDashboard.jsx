@@ -1,6 +1,6 @@
 // admin means the head of all the tasks who will moniter the employess
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import api from '../../services/api'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Layout from '../common/Layout'
@@ -15,14 +15,14 @@ const AdminDashboard = () => {
 
     // fetch tasks and users(employees)
     const fetchData = async () => {
-      const userResponse = await axios.get(`${import.meta.env.VITE_API_URL}/users`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      setUsers(userResponse.data)
-      const taskResponse = await axios.get(`${import.meta.env.VITE_API_URL}/tasks`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      setTasks(taskResponse.data)
+      try {
+        const userResponse = await api.get('/users');
+        setUsers(userResponse.data || []);
+        const taskResponse = await api.get('/tasks');
+        setTasks(taskResponse.data || []);
+      } catch (err) {
+        console.error('Error fetching admin data', err);
+      }
     }
     fetchData()
   }, []);
@@ -31,17 +31,13 @@ const AdminDashboard = () => {
     e.preventDefault()
     // updating the tasks
     try {
-      const token = localStorage.getItem('token')
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/tasks`, newTask, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      const response = await api.post('/tasks', newTask);
+      setTasks([...tasks, response.data]);
+      toast.success("Task assigned successfully");
     } catch (error) {
       console.error(error);
       toast.error("Failed to create task");
-
     }
-    setTasks([...tasks, response.data])
-    toast.success("Task assigned successfully");
   }
 
   // display on the browser

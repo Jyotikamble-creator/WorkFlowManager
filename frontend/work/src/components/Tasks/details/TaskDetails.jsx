@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../../services/api';
 import { useParams } from 'react-router-dom';
 import CommentList from './CommentList';
 import HistoryLog from './HistoryLog';
@@ -11,10 +11,7 @@ const TaskDetails = () => {
   // read the tasks by id 
   useEffect(() => {
     const fetchTask = async () => {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/tasks/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get(`/tasks/${id}`);
       setTask(response.data);
     };
     fetchTask();

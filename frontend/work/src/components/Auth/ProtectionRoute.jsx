@@ -10,13 +10,13 @@ const ProtectionRoute = ({ children, role }) => {
         return <Navigate to="/login" />;
     }
 
-    // user role check
+    // user must be authenticated
     if (!token || !user) {
         return <Navigate to="/login" />
     }
 
-    // navigate to their dashboard based on role
-    if (user.role !== role) {
+    // if role is provided, ensure user has that role; otherwise allow access
+    if (role && user.role !== role) {
         return <Navigate to={`/${user.role}`} />
     }
 

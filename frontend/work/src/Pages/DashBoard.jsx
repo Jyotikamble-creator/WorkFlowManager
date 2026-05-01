@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import AdminDashboard from '../components/dashboard/AdminDashboard';
-import ManagerDashboard from '../components/dashboard/ManagerDashboard';
-import EmployeeDashboard from '../components/dashboard/EmployeeDashboard';
-import axios from 'axios';
+import AdminDashboard from '../components/DashBoard/AdminDashboard';
+import ManagerDashboard from '../components/DashBoard/ManagerDashboard';
+import EmployeeDashboard from '../components/DashBoard/EmployeeDashboard';
 
 
 const DashboardPage = () => {
   const [role, setRole] = useState('');
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/users/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setRole(res.data.role);
-    };
-    fetchUser();
+    // Read role from localStorage if available (set by login)
+    const stored = localStorage.getItem('user');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setRole(parsed.role || '');
+      } catch (e) {
+        setRole('');
+      }
+    }
   }, []);
 
   if (!role) return <p>Loading dashboard...</p>;

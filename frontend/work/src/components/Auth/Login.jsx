@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import { login as loginService } from '../../services/authServices';
 import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
@@ -19,13 +19,11 @@ const Login = () => {
         console.log("Login");
 
         try {
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, { email, password });
+            const res = await loginService({ email, password });
+            const data = res.data;
 
-            // store token and user in localstorage
-            localStorage.setItem("token", res.data.token);
-            localStorage.setItem("user", JSON.stringify(res.data.user));
-
-            login(res.data.token, res.data.user);
+            // Use context login helper which will persist token and user
+            login(data.user || data);
 
             // reset form fields
             setEmail("");
@@ -34,7 +32,7 @@ const Login = () => {
             toast.success("Login Successful");
 
             // navigate based on role(admin,manager,employee)
-            const role = res.data.user.role
+            const role = data.user?.role || data.role || data.user?.role;
             navigate(`/${role}`);
 
         } catch (error) {
@@ -81,7 +79,7 @@ const Login = () => {
                     {error && <p className='text-red-500'>{error}</p>}
 
                     <p className='text-white'>Don't have an account?
-                        <a href="/SignUp" className='text-blue-500'>Sign Up</a>
+                            <a href="/signup" className='text-blue-500'>Sign Up</a>
                     </p>
 
                 </form>
