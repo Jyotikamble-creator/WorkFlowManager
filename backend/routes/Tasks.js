@@ -3,6 +3,34 @@ const Task = require("../models/Task");
 const router = require("express").Router();
 
 
+// Get tasks assigned to the logged-in employee
+router.get('/employee', auth, async (req, res) => {
+    try {
+        const tasks = await Task.find({ assignedTo: req.user.id || req.user._id })
+            .populate('assignedTo', 'email name role')
+            .populate('createdBy', 'email name role')
+            .populate({ path: 'comments', populate: { path: 'createdBy', select: 'name' } });
+        res.json(tasks);
+    } catch (err) {
+        console.error('Error fetching employee tasks:', err);
+        res.status(500).json({ message: 'Server error while fetching employee tasks' });
+    }
+});
+
+// Get tasks assigned by the logged-in manager
+router.get('/manager', auth, async (req, res) => {
+    try {
+        const tasks = await Task.find({ createdBy: req.user.id || req.user._id })
+            .populate('assignedTo', 'email name role')
+            .populate('createdBy', 'email name role')
+            .populate({ path: 'comments', populate: { path: 'createdBy', select: 'name' } });
+        res.json(tasks);
+    } catch (err) {
+        console.error('Error fetching manager tasks:', err);
+        res.status(500).json({ message: 'Server error while fetching manager tasks' });
+    }
+});
+
 // Get/read all tasks by id
 router.get('/:id', auth, async (req, res) => {
     try {
