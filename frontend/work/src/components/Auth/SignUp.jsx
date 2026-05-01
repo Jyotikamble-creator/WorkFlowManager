@@ -12,11 +12,13 @@ const SignUp = () => {
 
   // two way binding
   const submitHandler = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
     console.log("Sign Up");
 
     try {
-      await signupService({ email, password, role });
+      await signupService({ name: email, email, password, role });
       setError("");
       toast.success("Registration Successful! Please login.");
       navigate("/login");
@@ -30,7 +32,7 @@ const SignUp = () => {
     <div className='bg-gray-700 h-screen w-screen flex flex-col justify-center items-center'>
       <div className='text-3xl text-white mb-5 mt-5 p-20 border rounded-4xl border-amber-200'>
         Create An Account
-        <form onSubmit={submitHandler} className='flex flex-col gap-5 items-center justify-center'>
+        <div className='flex flex-col gap-5 items-center justify-center'>
 
           <input
             onChange={e => setEmail(e.target.value)}
@@ -39,8 +41,7 @@ const SignUp = () => {
             value={email}
             placeholder="Enter Your Username"
             required
-          >
-          </input>
+          />
 
           <input
             onChange={e => setPassword(e.target.value)}
@@ -49,7 +50,7 @@ const SignUp = () => {
             value={password}
             placeholder='Enter Your Password'
             required
-          ></input>
+          />
 
           {/* role based */}
           <select
@@ -62,7 +63,8 @@ const SignUp = () => {
             <option value="admin">Admin</option>
           </select>
 
-          <button type='submit'
+          <button type='button'
+            onClick={submitHandler}
             className='text-blue-600 text-xl border-none rounded-full bg-green-300 py-2 px-5 mt-5'>
             Sign Up
           </button>
@@ -73,7 +75,7 @@ const SignUp = () => {
             <a href="/login" className='text-blue-500'>Login</a>
           </p>
 
-        </form>
+        </div>
 
       </div>
 

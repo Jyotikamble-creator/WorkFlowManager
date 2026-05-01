@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 
 const ManagerDashboard = () => {
   const [tasks, setTasks] = useState([]);
@@ -9,32 +9,35 @@ const ManagerDashboard = () => {
   // read all tasks assigned by the manager
   useEffect(() => {
     const fetchTasks = async () => {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/tasks/manager`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setTasks(response.data);
+      try {
+        const response = await api.get('/tasks/manager');
+        setTasks(response.data);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+      }
     };
     fetchTasks();
   }, []);
 
   // updated all taks  done by the employee
   const updateStatus = async (id, status) => {
-    const token = localStorage.getItem("token");
-    await axios.put(`${import.meta.env.VITE_API_URL}/tasks/${id}/status`, { status }, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    window.location.reload();
+    try {
+      await api.put(`/tasks/${id}/status`, { status });
+      window.location.reload();
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
   };
 
   // submission
   const handleCommentSubmit = async (taskId, text) => {
-    const token = localStorage.getItem("token");
-    await axios.post(`${import.meta.env.VITE_API_URL}/tasks/${taskId}/comments`, { text }, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    setCommentInputs({ ...commentInputs, [taskId]: "" });
-    window.location.reload();
+    try {
+      await api.post(`/tasks/${taskId}/comments`, { text });
+      setCommentInputs({ ...commentInputs, [taskId]: "" });
+      window.location.reload();
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+    }
   };
 
   // Filter tasks based on status

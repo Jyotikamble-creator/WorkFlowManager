@@ -15,7 +15,9 @@ const Login = () => {
 
     // two way banding
     const submitHandler = async (e) => {
-        e.preventDefault();
+        if (e && e.preventDefault) {
+            e.preventDefault();
+        }
         console.log("Login");
 
         try {
@@ -23,7 +25,7 @@ const Login = () => {
             const data = res.data;
 
             // Use context login helper which will persist token and user
-            login(data.user || data);
+            login(data);
 
             // reset form fields
             setEmail("");
@@ -32,7 +34,7 @@ const Login = () => {
             toast.success("Login Successful");
 
             // navigate based on role(admin,manager,employee)
-            const role = data.user?.role || data.role || data.user?.role;
+            const role = data.user?.role;
             navigate(`/${role}`);
 
         } catch (error) {
@@ -46,11 +48,7 @@ const Login = () => {
     return (
         <div className='bg-gray-700 h-screen w-screen flex flex-col justify-center items-center'>
             <div className='text-3xl text-white mb-5 mt-5 p-20  border rounded-4xl border-amber-200'>Welcome
-                <form
-                    onSubmit={(e) =>
-                        submitHandler(e)
-                    }
-                    className='flex flex-col gap-5 items-center justify-center'>
+                <div className='flex flex-col gap-5 items-center justify-center'>
                     <input
                         onChange={(e) => setEmail(e.target.value)}
                         type="email"
@@ -58,8 +56,7 @@ const Login = () => {
                         placeholder=" Enter Your Email"
                         required
                         className=' text-blue-600 text-xl outline-none border-2 bg-transparent rounded-full border-green-300  py-2 px-5 '
-                    >
-                    </input>
+                    />
 
                     <input
                         onChange={(e) => setPassword(e.target.value)}
@@ -68,10 +65,10 @@ const Login = () => {
                         placeholder='Enter Your Password'
                         required
                         className=' text-blue-600 text-xl outline-none border-2 bg-transparent rounded-full border-green-300  py-2 px-5 '
-                    >
-                    </input>
+                    />
 
-                    <button type='submit'
+                    <button type='button'
+                        onClick={submitHandler}
                         className='  text-blue-600 text-xl outlinenone border-none  rounded-full bg-green-300  py-2 px-5 mt-5 '>
                         Login
                     </button>
@@ -82,7 +79,7 @@ const Login = () => {
                             <a href="/signup" className='text-blue-500'>Sign Up</a>
                     </p>
 
-                </form>
+                </div>
 
             </div>
 

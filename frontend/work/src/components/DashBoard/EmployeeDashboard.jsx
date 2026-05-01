@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 
 const EmployeeDashboard = () => {
   const [tasks, setTasks] = useState([]);
@@ -9,11 +9,12 @@ const EmployeeDashboard = () => {
   // Fetch tasks assigned to the employee from the backend
   useEffect(() => {
     const fetchTasks = async () => {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/tasks/employee`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setTasks(response.data);
+      try {
+        const response = await api.get('/tasks/employee');
+        setTasks(response.data);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+      }
     };
 
     fetchTasks();
@@ -21,40 +22,42 @@ const EmployeeDashboard = () => {
 
   // Update task status by the employee(backend)
   const updateStatus = async (taskID, status) => {
-    const token = localStorage.getItem('token');
-    await axios.put(
-      `${import.meta.env.VITE_BACKEND_URL}/tasks/${taskID}/status`,
-      { status },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    window.location.reload();
+    try {
+      await api.put(`/tasks/${taskID}/status`, { status });
+      window.location.reload();
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
   };
 
   // Handle work submission
   const handleSubmitWork = async (e, taskId) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    const formData = new FormData(e.target);
-    await axios.post(`${import.meta.env.VITE_BACKEND_URL}/tasks/${taskId}/submit`, formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    alert('Work submitted!');
-    window.location.reload();
+    try {
+      const formData = new FormData(e.target);
+      await api.post(`/tasks/${taskId}/submit`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      alert('Work submitted!');
+      window.location.reload();
+    } catch (error) {
+      console.error('Error submitting work:', error);
+    }
   };
 
   // Handle comment submission by the employee
   const handleCommentSubmit = async (taskId) => {
-    const token = localStorage.getItem('token');
-    await axios.post(`${import.meta.env.VITE_BACKEND_URL}/tasks/${taskId}/comments`, {
-      text: commentText[taskId],
-    }, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setCommentText(prev => ({ ...prev, [taskId]: '' }));
-    window.location.reload();
+    try {
+      await api.post(`/tasks/${taskId}/comments`, {
+        text: commentText[taskId],
+      });
+      setCommentText(prev => ({ ...prev, [taskId]: '' }));
+      window.location.reload();
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+    }
   };
 
   const filteredTasks = tasks.filter(task =>
