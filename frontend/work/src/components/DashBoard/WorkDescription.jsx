@@ -23,12 +23,30 @@ const WorkDescription = () => {
 
   // displaytheworking tasks
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-2">{task.title}</h1>
-      <p className="mb-1">{task.description}</p>
-      <p className="mb-1"><strong>Status:</strong> {task.status}</p>
-      <p className="mb-1"><strong>Assigned To:</strong> {task.assignedTo?.username}</p>
-      <p className="mb-1"><strong>Created By:</strong> {task.createdBy?.username}</p>
+    <div className="p-8 bg-gray-50 min-h-screen">
+      <div className="bg-white rounded-lg shadow-lg p-8">
+        <h1 className="text-4xl font-bold mb-6 text-gray-800">{task.title}</h1>
+        <p className="text-gray-600 text-lg mb-8">{task.description}</p>
+        
+        <div className="grid grid-cols-2 gap-6 border-t pt-6">
+          <div className="bg-blue-50 p-6 rounded-lg">
+            <p className="text-gray-600 text-sm font-semibold mb-2">Status</p>
+            <p className={`text-xl font-bold ${
+              task.status === 'completed' ? 'text-green-600' :
+              task.status === 'in progress' ? 'text-yellow-600' :
+              'text-red-600'
+            }`}>{task.status?.toUpperCase() || 'N/A'}</p>
+          </div>
+          <div className="bg-blue-50 p-6 rounded-lg">
+            <p className="text-gray-600 text-sm font-semibold mb-2">Assigned To</p>
+            <p className="text-xl font-bold text-gray-800">{task.assignedTo?.name || task.assignedTo?.email || 'Unassigned'}</p>
+          </div>
+          <div className="bg-green-50 p-6 rounded-lg">
+            <p className="text-gray-600 text-sm font-semibold mb-2">Created By</p>
+            <p className="text-xl font-bold text-gray-800">{task.createdBy?.name || task.createdBy?.email}</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

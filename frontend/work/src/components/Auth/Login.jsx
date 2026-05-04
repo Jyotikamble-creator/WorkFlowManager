@@ -46,43 +46,52 @@ const Login = () => {
     // display login form
 
     return (
-        <div className='bg-gray-700 h-screen w-screen flex flex-col justify-center items-center'>
-            <div className='text-3xl text-white mb-5 mt-5 p-20  border rounded-4xl border-amber-200'>Welcome
-                <div className='flex flex-col gap-5 items-center justify-center'>
-                    <input
-                        onChange={(e) => setEmail(e.target.value)}
-                        type="email"
-                        value={email}
-                        placeholder=" Enter Your Email"
-                        required
-                        className=' text-blue-600 text-xl outline-none border-2 bg-transparent rounded-full border-green-300  py-2 px-5 '
-                    />
-
-                    <input
-                        onChange={(e) => setPassword(e.target.value)}
-                        type="password"
-                        value={password}
-                        placeholder='Enter Your Password'
-                        required
-                        className=' text-blue-600 text-xl outline-none border-2 bg-transparent rounded-full border-green-300  py-2 px-5 '
-                    />
-
-                    <button type='button'
-                        onClick={submitHandler}
-                        className='  text-blue-600 text-xl outlinenone border-none  rounded-full bg-green-300  py-2 px-5 mt-5 '>
-                        Login
-                    </button>
-
-                    {error && <p className='text-red-500'>{error}</p>}
-
-                    <p className='text-white'>Don't have an account?
-                            <a href="/signup" className='text-blue-500'>Sign Up</a>
-                    </p>
-
+        <div className='bg-gradient-to-br from-blue-600 to-blue-800 min-h-screen flex items-center justify-center px-4'>
+            <div className='w-full max-w-md bg-white rounded-lg shadow-2xl p-8'>
+                <div className='text-center mb-8'>
+                    <h1 className='text-4xl font-bold text-gray-800 mb-2'>Welcome Back</h1>
+                    <p className='text-gray-600'>Sign in to your account</p>
                 </div>
 
-            </div>
+                <form onSubmit={submitHandler} className='space-y-4'>
+                    <div>
+                        <label className='block text-gray-700 font-semibold mb-2'>Email</label>
+                        <input
+                            onChange={(e) => setEmail(e.target.value)}
+                            type="email"
+                            value={email}
+                            placeholder="your@email.com"
+                            required
+                            className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                        />
+                    </div>
 
+                    <div>
+                        <label className='block text-gray-700 font-semibold mb-2'>Password</label>
+                        <input
+                            onChange={(e) => setPassword(e.target.value)}
+                            type="password"
+                            value={password}
+                            placeholder='Enter your password'
+                            required
+                            className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                        />
+                    </div>
+
+                    {error && <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded'>{error}</div>}
+
+                    <button type='submit'
+                        className='w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 mt-6'>
+                        Sign In
+                    </button>
+                </form>
+
+                <div className='mt-6 text-center'>
+                    <p className='text-gray-600'>Don't have an account?{' '}
+                        <a href="/signup" className='text-blue-600 font-semibold hover:text-blue-700'>Create one</a>
+                    </p>
+                </div>
+            </div>
         </div>
     )
 }

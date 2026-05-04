@@ -65,62 +65,81 @@ const EmployeeDashboard = () => {
   );
 
   return (
-    <div className="p-4">
-      <h1 className="text-3xl font-bold mb-4">Employee Dashboard</h1>
+    <div className="p-8 bg-gray-50 min-h-screen">
+      <h1 className="text-4xl font-bold mb-8 text-gray-800">👤 Employee Dashboard</h1>
 
       {/* Filter dropdown of the tasks result */}
-      <select
-        className="border mb-4 p-2"
-        value={statusFilter}
-        onChange={(e) => setStatusFilter(e.target.value)}>
-
-        <option value="all">All</option>
-        <option value="pending">Pending</option>
-        <option value="in progress">In Progress</option>
-        <option value="completed">Completed</option>
-      </select>
+      <div className="mb-8 flex items-center gap-4">
+        <label className="font-semibold text-gray-700">Filter by Status:</label>
+        <select
+          className="border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}>
+          <option value="all">All Tasks</option>
+          <option value="pending">Pending</option>
+          <option value="in progress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
+        <span className='text-gray-600'>({filteredTasks.length} tasks)</span>
+      </div>
 
       {/* display the tasks */}
       {filteredTasks.length === 0 ? (
-        <p>No tasks available.</p>
+        <div className='text-center py-12 bg-white rounded-lg'>
+          <p className='text-gray-500 text-lg'>📭 No tasks assigned to you yet</p>
+        </div>
       ) : (
-        filteredTasks.map((task) => (
-          <div key={task._id} className="border p-4 rounded shadow mb-6">
-            <h2 className="text-xl font-semibold">{task.title}</h2>
-            <p>{task.description}</p>
-            <p>Status: <strong>{task.status}</strong></p>
+        <div className='space-y-4'>
+        {filteredTasks.map((task) => (
+          <div key={task._id} className="bg-white border border-gray-200 rounded-lg shadow hover:shadow-lg transition p-6">
+            <div className='flex justify-between items-start mb-3'>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">{task.title}</h2>
+                <p className="text-gray-600 mt-2">{task.description}</p>
+              </div>
+              <span className={`px-4 py-2 rounded-full font-semibold text-sm ${
+                task.status === 'completed' ? 'bg-green-100 text-green-800' :
+                task.status === 'in progress' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-red-100 text-red-800'
+              }`}>{task.status.toUpperCase()}</span>
+            </div>
 
-            <div className="mt-2">
+            <div className="my-4 flex gap-2">
               <button
                 onClick={() => updateStatus(task._id, 'in progress')}
-                className="bg-yellow-500 text-white px-3 py-1 rounded mr-2">
-                In Progress
+                className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded transition font-semibold">
+                📊 In Progress
               </button>
-
               <button
                 onClick={() => updateStatus(task._id, 'completed')}
-                className="bg-green-600 text-white px-3 py-1 rounded">
-                Completed
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition font-semibold">
+                ✓ Mark Completed
               </button>
-
             </div>
 
             {/* Comments  by the employee on the tasks*/}
-            <div className="mt-4">
-              <h3 className="font-semibold mb-1">Comments</h3>
-              {task.comments?.map((c, i) => (
-                <div key={i} className="text-sm border-b mb-1">
-                  <p><strong>{c.user?.username}</strong>: {c.text}</p>
-                  <p className="text-xs text-gray-500">{new Date(c.timestamp).toLocaleString()}</p>
-                </div>
-              ))}
+            <div className="mt-6 border-t pt-4">
+              <h3 className="font-semibold text-gray-800 mb-3">💬 Comments</h3>
+              <div className='space-y-2 max-h-32 overflow-y-auto mb-3'>
+                {task.comments?.length > 0 ? (
+                  task.comments.map((c, i) => (
+                    <div key={i} className="text-sm bg-gray-50 p-2 rounded border-l-4 border-blue-500">
+                      <p className='font-semibold text-gray-800'>{c.createdBy?.name || 'Anonymous'}</p>
+                      <p className="text-gray-700">{c.text}</p>
+                      <p className="text-xs text-gray-500">{new Date(c.createdAt).toLocaleString()}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className='text-gray-500 text-sm'>No comments yet</p>
+                )}
+              </div>
 
               {/* submission of the comments */}
-              <div className="flex mt-2">
+              <div className="flex gap-2">
                 <input
                   type="text"
                   placeholder="Add a comment..."
-                  className="border flex-1 p-2 mr-2"
+                  className="border border-gray-300 flex-1 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={commentText[task._id] || ''}
                   onChange={(e) =>
                     setCommentText({ ...commentText, [task._id]: e.target.value })
@@ -128,7 +147,7 @@ const EmployeeDashboard = () => {
                 />
                 <button
                   onClick={() => handleCommentSubmit(task._id)}
-                  className="bg-blue-500 text-white px-3 py-1 rounded"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition font-semibold"
                 >
                   Send
                 </button>
@@ -139,21 +158,23 @@ const EmployeeDashboard = () => {
             <form
               onSubmit={(e) => handleSubmitWork(e, task._id)}
               encType="multipart/form-data"
-              className="mt-4"
+              className="mt-6 border-t pt-4"
             >
+              <h3 className="font-semibold text-gray-800 mb-3">📤 Submit Work</h3>
               <textarea
-                placeholder="Describe completed work..."
+                placeholder="Describe your completed work..."
                 name="note"
-                className="border p-2 w-full mt-2"
+                className="border border-gray-300 p-3 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
               />
 
-              <input type="file" name="file" className="mt-2" />
-              <button className="bg-blue-600 text-white px-4 py-1 mt-2 rounded">
-                Submit Work
+              <input type="file" name="file" className="block mb-3 text-gray-700" />
+              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded transition">
+                📤 Submit Work
               </button>
             </form>
           </div>
-        ))
+        ))}
+        </div>
       )}
     </div>
   );

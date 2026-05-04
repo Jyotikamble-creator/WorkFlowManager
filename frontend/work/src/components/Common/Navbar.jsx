@@ -12,11 +12,11 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-blue-600 text-white px-4 py-3 flex justify-between items-center">
-      <Link to="/" className="text-xl font-bold">WorkflowManager</Link>
-      <div className="space-x-4">
-        <Link to="/dashboard">Dashboard</Link>
-        <button onClick={handleLogout} className="bg-red-500 px-3 py-1 rounded">Logout</button>
+    <nav className="bg-gradient-to-r from-blue-600 to-blue-800 text-white px-6 py-4 flex justify-between items-center shadow-lg">
+      <Link to="/" className="text-2xl font-bold flex items-center gap-2">🚀 WorkflowManager</Link>
+      <div className="space-x-6 flex items-center">
+        <Link to="/dashboard" className="hover:text-blue-200 transition font-medium">Dashboard</Link>
+        <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition font-medium">Logout</button>
       </div>
     </nav>
   );

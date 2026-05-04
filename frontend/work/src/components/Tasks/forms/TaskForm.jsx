@@ -19,42 +19,53 @@ const TaskForm = () => {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Create Task</h2>
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-4">
+    <div className="p-8">
+      <div className='bg-white rounded-lg shadow-lg p-8'>
+        <h2 className="text-3xl font-bold mb-8 text-gray-800">📝 Create New Task</h2>
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6">
 
-        <input
-          type="text"
-          name="title"
-          placeholder="Title"
-          onChange={handleChange}
-          className="border p-2 w-full" required
-        >
-        </input>
+          <div>
+            <label className='block text-gray-700 font-semibold mb-2'>Task Title</label>
+            <input
+              type="text"
+              name="title"
+              placeholder="Enter task title"
+              onChange={handleChange}
+              className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+              required
+            />
+          </div>
 
-        <textarea
-          name="description"
-          placeholder="Description"
-          onChange={handleChange}
-          className="border p-2 w-full" required
-        >
-        </textarea>
+          <div>
+            <label className='block text-gray-700 font-semibold mb-2'>Description</label>
+            <textarea
+              name="description"
+              placeholder="Enter task description"
+              onChange={handleChange}
+              className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-32" 
+              required
+            />
+          </div>
 
-        <input
-          type="text"
-          name="assignedTo"
-          placeholder="Assign to (user ID)"
-          onChange={handleChange}
-          className="border p-2 w-full"
-          required ></input>
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded">
-          Create
-        </button>
-        
-      </form>
+          <div>
+            <label className='block text-gray-700 font-semibold mb-2'>Assign to (User ID)</label>
+            <input
+              type="text"
+              name="assignedTo"
+              placeholder="Enter user ID"
+              onChange={handleChange}
+              className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required 
+            />
+          </div>
+          <button
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition">
+            Create Task
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
