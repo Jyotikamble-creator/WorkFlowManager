@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { clientLogger, LogTags } from '../../utils/logger';
 
 // Sidebar component displays the side navigation menu
 // Shows different links based on user role
@@ -23,6 +24,9 @@ const Sidebar = () => {
       </ul>
     </aside>
   );
+  useEffect(() => {
+    clientLogger.debug(LogTags.PAGE_LOAD, 'Sidebar rendered', { role });
+  }, [role]);
 };
 
 export default Sidebar;

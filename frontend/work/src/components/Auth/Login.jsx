@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { login as loginService } from '../../services/authServices';
 import { useAuth } from '../../context/AuthContext';
+import { clientLogger, LogTags } from '../../utils/logger';
 
 // Login component provides the login form and handles authentication
 const Login = () => {
@@ -20,7 +22,7 @@ const Login = () => {
         if (e && e.preventDefault) {
             e.preventDefault();
         }
-        console.log("Login");
+        clientLogger.info(LogTags.LOGIN, `Login attempt for ${email}`);
 
         try {
             // Call login service with email and password
@@ -35,6 +37,7 @@ const Login = () => {
             setPassword("");
             setError("");
             toast.success("Login Successful");
+            clientLogger.info(LogTags.LOGIN, `Login success for ${email}`);
 
             // Navigate based on user role (admin, manager, employee)
             const role = data.user?.role;
@@ -43,8 +46,8 @@ const Login = () => {
         } catch (error) {
             // Show error message from the server if available
             setError(error.response?.data?.message || "Invalid Credentials")
+            clientLogger.error(LogTags.LOGIN, `Login failed for ${email}`, error);
         }
-
     }
 
     // Render the login form UI

@@ -1,7 +1,9 @@
+
 import React, { useEffect, useState } from 'react';
 import AdminDashboard from '../components/DashBoard/AdminDashboard';
 import ManagerDashboard from '../components/DashBoard/ManagerDashboard';
 import EmployeeDashboard from '../components/DashBoard/EmployeeDashboard';
+import { clientLogger, LogTags } from '../utils/logger';
 
 // DashboardPage component decides which dashboard to show based on user role
 const DashboardPage = () => {
@@ -9,6 +11,7 @@ const DashboardPage = () => {
   const [role, setRole] = useState('');
 
   useEffect(() => {
+    clientLogger.info(LogTags.PAGE_LOAD, 'DashBoard page loaded');
     // On mount, read the user role from localStorage (set during login)
     const stored = localStorage.getItem('user');
     if (stored) {

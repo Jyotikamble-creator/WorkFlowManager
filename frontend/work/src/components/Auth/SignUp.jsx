@@ -1,7 +1,9 @@
+
 import React, { useState } from 'react';
 import { signup as signupService } from '../../services/authServices';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { clientLogger, LogTags } from '../../utils/logger';
 
 // SignUp component provides the registration form for new users
 const SignUp = () => {
@@ -17,18 +19,19 @@ const SignUp = () => {
     if (e && e.preventDefault) {
       e.preventDefault();
     }
-    console.log("Sign Up");
+    clientLogger.info(LogTags.REGISTER, `Signup attempt for ${email}`);
 
     try {
       // Call signup service with form data
       await signupService({ name: email, email, password, role });
       setError("");
       toast.success("Registration Successful! Please login.");
+      clientLogger.info(LogTags.REGISTER, `Signup success for ${email}`);
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed")
+      clientLogger.error(LogTags.REGISTER, `Signup failed for ${email}`, err);
     }
-
   };
 
   // Render the signup form UI

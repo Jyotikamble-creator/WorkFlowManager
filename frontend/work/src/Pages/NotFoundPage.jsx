@@ -1,8 +1,14 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { clientLogger, LogTags } from '../utils/logger';
+
 
 // NotFoundPage component displays a 404 error for unknown routes
 const NotFoundPage = () => {
+  useEffect(() => {
+    clientLogger.warn(LogTags.PAGE_LOAD, '404 NotFoundPage loaded');
+  }, []);
   return (
     <div className="p-10 text-center">
       <h1 className="text-4xl font-bold text-red-600">404 - Page Not Found</h1>

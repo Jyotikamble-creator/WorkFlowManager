@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { clientLogger, LogTags } from '../../utils/logger';
 
 // Navbar component displays the top navigation bar
 const Navbar = () => {
@@ -9,6 +10,7 @@ const Navbar = () => {
 
   // Handle user logout and redirect to login page
   const handleLogout = () => {
+    clientLogger.info(LogTags.LOGOUT, 'User logged out');
     logout();
     navigate('/login');
   };

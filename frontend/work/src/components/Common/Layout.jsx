@@ -2,6 +2,7 @@ import React from 'react';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import { useAuth } from '../../context/AuthContext';
+import { clientLogger, LogTags } from '../../utils/logger';
 
 // Layout component wraps the main app UI with Navbar and Sidebar
 // and provides a consistent layout for all pages
@@ -24,6 +25,9 @@ const Layout = ({ children }) => {
       </div>
     </div>
   );
+  useEffect(() => {
+    clientLogger.info(LogTags.PAGE_LOAD, 'Layout mounted', { role });
+  }, [role]);
 };
 
 export default Layout;
