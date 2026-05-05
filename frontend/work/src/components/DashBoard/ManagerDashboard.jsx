@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-toastify';
+import { clientLogger, LogTags } from '../../utils/logger';
 
 const ManagerDashboard = () => {
   const [tasks, setTasks] = useState([]);
@@ -13,17 +15,16 @@ const ManagerDashboard = () => {
 
   // read all tasks assigned by the manager
   useEffect(() => {
+    clientLogger.info(LogTags.PAGE_LOAD, 'ManagerDashboard loaded');
     const fetchData = async () => {
       setLoading(true);
       try {
         const tasksResponse = await api.get('/tasks/manager');
         setTasks(tasksResponse.data);
-
         const usersResponse = await api.get('/users');
-        // ManagerDashboard component displays the dashboard for managers
-        // Managers can view, filter, and update tasks, assign new tasks, and comment
+        clientLogger.info(LogTags.TASK_FETCH, 'Manager fetched tasks and users');
       } catch (error) {
-        console.error('Error fetching data:', error);
+        clientLogger.error(LogTags.TASK_FETCH, 'Error fetching data', error);
         toast.error('Failed to load data');
       } finally {
         setLoading(false);
@@ -34,12 +35,14 @@ const ManagerDashboard = () => {
 
   // Update task status
   const updateStatus = async (id, status) => {
+    clientLogger.info(LogTags.TASK_STATUS, `Manager updating status for task ${id} to ${status}`);
     try {
       await api.put(`/tasks/${id}`, { status });
       setTasks(tasks.map(t => t._id === id ? { ...t, status } : t));
       toast.success('Task status updated!');
+      clientLogger.info(LogTags.TASK_STATUS, `Task ${id} status updated to ${status}`);
     } catch (error) {
-      console.error('Error updating status:', error);
+      clientLogger.error(LogTags.TASK_STATUS, `Error updating status for task ${id}`, error);
       toast.error('Failed to update status');
     }
   };
@@ -51,13 +54,15 @@ const ManagerDashboard = () => {
       toast.warning('Please fill in all required fields');
       return;
     }
+    clientLogger.info(LogTags.TASK_CREATE, 'Manager creating new task', taskForm);
     try {
       const response = await api.post('/tasks', taskForm);
       setTasks([...tasks, response.data]);
       setTaskForm({ title: '', description: '', assignedTo: '' });
       toast.success('Task created successfully!');
+      clientLogger.info(LogTags.TASK_CREATE, 'Task created successfully', response.data);
     } catch (error) {
-      console.error('Error creating task:', error);
+      clientLogger.error(LogTags.TASK_CREATE, 'Error creating task', error);
       toast.error('Failed to create task');
     }
   };
@@ -69,6 +74,7 @@ const ManagerDashboard = () => {
       toast.warning('Comment cannot be empty');
       return;
     }
+    clientLogger.info(LogTags.COMMENT_ADD, `Manager adding comment to task ${taskId}`);
     try {
       await api.post(`/comments/${taskId}`, { text });
       setCommentInputs({ ...commentInputs, [taskId]: "" });
@@ -76,8 +82,9 @@ const ManagerDashboard = () => {
       const response = await api.get('/tasks/manager');
       setTasks(response.data);
       toast.success('Comment added!');
+      clientLogger.info(LogTags.COMMENT_ADD, `Comment added to task ${taskId}`);
     } catch (error) {
-      console.error('Error submitting comment:', error);
+      clientLogger.error(LogTags.COMMENT_ADD, `Error adding comment to task ${taskId}`, error);
       toast.error('Failed to add comment');
     }
   };

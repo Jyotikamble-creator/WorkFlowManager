@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { useParams } from 'react-router-dom';
+import { clientLogger, LogTags } from '../../utils/logger';
 
 // WorkDescription component displays detailed information about a single task
 // including its status, assigned user, and creator.
@@ -12,13 +14,15 @@ const WorkDescription = () => {
 
   // Fetch the task details by ID when component mounts or ID changes
   useEffect(() => {
+    clientLogger.info(LogTags.PAGE_LOAD, 'WorkDescription loaded', { id });
     const fetchTask = async () => {
       try {
         // Get task details from backend
         const response = await api.get(`/tasks/${id}`);
         setTask(response.data);
+        clientLogger.info(LogTags.TASK_FETCH, `Fetched task details for ${id}`);
       } catch (error) {
-        console.error("Failed to fetch task", error);
+        clientLogger.error(LogTags.TASK_FETCH, `Failed to fetch task ${id}`, error);
       }
     };
 

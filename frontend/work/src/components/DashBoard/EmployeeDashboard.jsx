@@ -1,7 +1,9 @@
 
+
 // EmployeeDashboard component displays the dashboard for employees.
 // Employees can view, filter, and update their assigned tasks, submit work, and comment on tasks.
 // This component fetches tasks, allows status updates, work submission, and commenting.
+import { clientLogger, LogTags } from '../../utils/logger';
 
 
 const EmployeeDashboard = () => {
@@ -18,14 +20,16 @@ const EmployeeDashboard = () => {
 
   // Fetch tasks assigned to the employee from the backend on mount
   useEffect(() => {
+    clientLogger.info(LogTags.PAGE_LOAD, 'EmployeeDashboard loaded');
     const fetchTasks = async () => {
       setLoading(true);
       try {
         // Get all tasks assigned to the employee
         const response = await api.get('/tasks/employee');
         setTasks(response.data);
+        clientLogger.info(LogTags.TASK_FETCH, 'Employee fetched tasks');
       } catch (error) {
-        console.error('Error fetching tasks:', error);
+        clientLogger.error(LogTags.TASK_FETCH, 'Error fetching tasks', error);
         toast.error('Failed to load tasks');
       } finally {
         setLoading(false);
@@ -36,13 +40,15 @@ const EmployeeDashboard = () => {
 
   // Update the status of a task (e.g., start progress, mark complete)
   const updateStatus = async (taskID, status) => {
+    clientLogger.info(LogTags.TASK_STATUS, `Employee updating status for task ${taskID} to ${status}`);
     try {
       await api.put(`/tasks/${taskID}`, { status });
       // Update the status in local state
       setTasks(tasks.map(t => t._id === taskID ? { ...t, status } : t));
       toast.success('Task status updated!');
+      clientLogger.info(LogTags.TASK_STATUS, `Task ${taskID} status updated to ${status}`);
     } catch (error) {
-      console.error('Error updating status:', error);
+      clientLogger.error(LogTags.TASK_STATUS, `Error updating status for task ${taskID}`, error);
       toast.error('Failed to update status');
     }
   };
@@ -50,6 +56,7 @@ const EmployeeDashboard = () => {
   // Handle submission of completed work for a task
   const handleSubmitWork = async (e, taskId) => {
     e.preventDefault();
+    clientLogger.info(LogTags.TASK_UPDATE, `Employee submitting work for task ${taskId}`);
     try {
       // Prepare form data for file upload and note
       const formData = new FormData(e.target);
@@ -63,8 +70,9 @@ const EmployeeDashboard = () => {
       // Refresh tasks after submission
       const response = await api.get('/tasks/employee');
       setTasks(response.data);
+      clientLogger.info(LogTags.TASK_UPDATE, `Work submitted for task ${taskId}`);
     } catch (error) {
-      console.error('Error submitting work:', error);
+      clientLogger.error(LogTags.TASK_UPDATE, `Error submitting work for task ${taskId}`, error);
       toast.error('Failed to submit work');
     }
   };
@@ -76,6 +84,7 @@ const EmployeeDashboard = () => {
       toast.warning('Comment cannot be empty');
       return;
     }
+    clientLogger.info(LogTags.COMMENT_ADD, `Employee adding comment to task ${taskId}`);
     try {
       await api.post(`/comments/${taskId}`, { text });
       setCommentText(prev => ({ ...prev, [taskId]: '' }));
@@ -83,8 +92,9 @@ const EmployeeDashboard = () => {
       const response = await api.get('/tasks/employee');
       setTasks(response.data);
       toast.success('Comment added!');
+      clientLogger.info(LogTags.COMMENT_ADD, `Comment added to task ${taskId}`);
     } catch (error) {
-      console.error('Error submitting comment:', error);
+      clientLogger.error(LogTags.COMMENT_ADD, `Error adding comment to task ${taskId}`, error);
       toast.error('Failed to add comment');
     }
   };

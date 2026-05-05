@@ -1,11 +1,13 @@
 // AdminDashboard.jsx
 // This component is the main dashboard for the Admin user.
 // Admin can view all users, assign tasks, and see all tasks in the system.
+
 import React, { useState, useEffect } from 'react'
 import api from '../../services/api'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Layout from '../Common/Layout'
+import { clientLogger, LogTags } from '../../utils/logger';
 
 const AdminDashboard = () => {
   // State to store all tasks
@@ -16,6 +18,7 @@ const AdminDashboard = () => {
   const [newTask, setNewTask] = useState({ title: "", description: "", assignedTo: "" });
 
   useEffect(() => {
+    clientLogger.info(LogTags.PAGE_LOAD, 'AdminDashboard loaded');
     // On mount, fetch all users and tasks from the backend
     const token = localStorage.getItem('token');
 
@@ -27,8 +30,9 @@ const AdminDashboard = () => {
         // Fetch all tasks
         const taskResponse = await api.get('/tasks');
         setTasks(taskResponse.data || []);
+        clientLogger.info(LogTags.TASK_FETCH, 'Admin fetched users and tasks');
       } catch (err) {
-        console.error('Error fetching admin data', err);
+        clientLogger.error(LogTags.TASK_FETCH, 'Error fetching admin data', err);
       }
     }
     fetchData()
@@ -37,13 +41,15 @@ const AdminDashboard = () => {
   // Handle form submission for creating a new task
   const handleTaskSubmit = async (e) => {
     e.preventDefault()
+    clientLogger.info(LogTags.TASK_CREATE, 'Admin creating new task', newTask);
     try {
       // Send new task data to backend
       const response = await api.post('/tasks', newTask);
       setTasks([...tasks, response.data]); // Add new task to state
       toast.success("Task assigned successfully");
+      clientLogger.info(LogTags.TASK_CREATE, 'Task assigned successfully', response.data);
     } catch (error) {
-      console.error(error);
+      clientLogger.error(LogTags.TASK_CREATE, 'Failed to create task', error);
       toast.error("Failed to create task");
     }
   }
