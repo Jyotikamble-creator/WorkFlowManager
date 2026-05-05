@@ -2,15 +2,19 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { useParams } from 'react-router-dom';
 
-
+// WorkDescription component displays detailed information about a single task
+// including its status, assigned user, and creator.
 const WorkDescription = () => {
+  // State to store the task object
   const [task, setTask] = useState({});
+  // Get the task ID from the URL params
   const { id } = useParams();
 
-// read all the tasks
+  // Fetch the task details by ID when component mounts or ID changes
   useEffect(() => {
     const fetchTask = async () => {
       try {
+        // Get task details from backend
         const response = await api.get(`/tasks/${id}`);
         setTask(response.data);
       } catch (error) {
@@ -21,13 +25,15 @@ const WorkDescription = () => {
     fetchTask();
   }, [id]);
 
-  // displaytheworking tasks
+  // Render the task details UI
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       <div className="bg-white rounded-lg shadow-lg p-8">
+        {/* Task title and description */}
         <h1 className="text-4xl font-bold mb-6 text-gray-800">{task.title}</h1>
         <p className="text-gray-600 text-lg mb-8">{task.description}</p>
         
+        {/* Task info grid: status, assigned to, created by */}
         <div className="grid grid-cols-2 gap-6 border-t pt-6">
           <div className="bg-blue-50 p-6 rounded-lg">
             <p className="text-gray-600 text-sm font-semibold mb-2">Status</p>

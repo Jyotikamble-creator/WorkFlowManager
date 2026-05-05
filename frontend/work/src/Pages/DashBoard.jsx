@@ -3,12 +3,13 @@ import AdminDashboard from '../components/DashBoard/AdminDashboard';
 import ManagerDashboard from '../components/DashBoard/ManagerDashboard';
 import EmployeeDashboard from '../components/DashBoard/EmployeeDashboard';
 
-
+// DashboardPage component decides which dashboard to show based on user role
 const DashboardPage = () => {
+  // State to store the user's role
   const [role, setRole] = useState('');
 
   useEffect(() => {
-    // Read role from localStorage if available (set by login)
+    // On mount, read the user role from localStorage (set during login)
     const stored = localStorage.getItem('user');
     if (stored) {
       try {
@@ -20,8 +21,10 @@ const DashboardPage = () => {
     }
   }, []);
 
+  // Show loading state if role is not determined yet
   if (!role) return <p>Loading dashboard...</p>;
 
+  // Render the appropriate dashboard based on user role
   return (
     <div className="p-4">
       {role === 'admin' && <AdminDashboard />}

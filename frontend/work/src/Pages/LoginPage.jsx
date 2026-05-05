@@ -1,10 +1,11 @@
 import React from 'react';
 import Login from '../components/Auth/Login';
 
-// this will visible on broswer because it is page
+// LoginPage component renders the login form for users
 const LoginPage = () => {
   return (
     <div className="p-4">
+      {/* Login form component */}
       <Login />
     </div>
   );

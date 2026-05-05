@@ -1,19 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import api from '../../services/api';
-import { toast } from 'react-toastify';
+
+// EmployeeDashboard component displays the dashboard for employees.
+// Employees can view, filter, and update their assigned tasks, submit work, and comment on tasks.
+// This component fetches tasks, allows status updates, work submission, and commenting.
+
 
 const EmployeeDashboard = () => {
+  // State for all tasks assigned to the employee
   const [tasks, setTasks] = useState([]);
+  // State for filtering tasks by status
   const [statusFilter, setStatusFilter] = useState('all');
+  // State for search query
   const [searchQuery, setSearchQuery] = useState('');
+  // State for comment input per task
   const [commentText, setCommentText] = useState({});
+  // Loading state for async actions
   const [loading, setLoading] = useState(false);
 
-  // Fetch tasks assigned to the employee from the backend
+  // Fetch tasks assigned to the employee from the backend on mount
   useEffect(() => {
     const fetchTasks = async () => {
       setLoading(true);
       try {
+        // Get all tasks assigned to the employee
         const response = await api.get('/tasks/employee');
         setTasks(response.data);
       } catch (error) {
@@ -23,14 +31,14 @@ const EmployeeDashboard = () => {
         setLoading(false);
       }
     };
-
     fetchTasks();
   }, []);
 
-  // Update task status by the employee
+  // Update the status of a task (e.g., start progress, mark complete)
   const updateStatus = async (taskID, status) => {
     try {
       await api.put(`/tasks/${taskID}`, { status });
+      // Update the status in local state
       setTasks(tasks.map(t => t._id === taskID ? { ...t, status } : t));
       toast.success('Task status updated!');
     } catch (error) {
@@ -39,10 +47,11 @@ const EmployeeDashboard = () => {
     }
   };
 
-  // Handle work submission
+  // Handle submission of completed work for a task
   const handleSubmitWork = async (e, taskId) => {
     e.preventDefault();
     try {
+      // Prepare form data for file upload and note
       const formData = new FormData(e.target);
       await api.post(`/tasks/${taskId}/submit`, formData, {
         headers: {
@@ -51,7 +60,7 @@ const EmployeeDashboard = () => {
       });
       toast.success('Work submitted successfully!');
       e.target.reset();
-      // Refresh tasks
+      // Refresh tasks after submission
       const response = await api.get('/tasks/employee');
       setTasks(response.data);
     } catch (error) {
@@ -60,7 +69,7 @@ const EmployeeDashboard = () => {
     }
   };
 
-  // Handle comment submission
+  // Handle submission of a comment for a task
   const handleCommentSubmit = async (taskId) => {
     const text = commentText[taskId]?.trim();
     if (!text) {
@@ -80,7 +89,7 @@ const EmployeeDashboard = () => {
     }
   };
 
-  // Filter and search tasks
+  // Filter and search tasks based on status and search query
   const filteredTasks = tasks.filter(task => {
     const matchesStatus = statusFilter === 'all' ? true : task.status === statusFilter;
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -88,7 +97,7 @@ const EmployeeDashboard = () => {
     return matchesStatus && matchesSearch;
   });
 
-  // Calculate stats
+  // Calculate statistics for dashboard cards
   const stats = {
     total: tasks.length,
     pending: tasks.filter(t => t.status === 'open' || t.status === 'pending').length,
@@ -106,18 +115,22 @@ const EmployeeDashboard = () => {
 
       {/* Stats Cards */}
       <div className='grid grid-cols-4 gap-4 mb-8'>
+        {/* Total assigned tasks */}
         <div className='bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6'>
           <p className='text-gray-600 text-sm font-semibold mb-1'>Total Assigned</p>
           <p className='text-3xl font-bold text-blue-600'>{stats.total}</p>
         </div>
+        {/* Pending tasks */}
         <div className='bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-lg p-6'>
           <p className='text-gray-600 text-sm font-semibold mb-1'>Pending</p>
           <p className='text-3xl font-bold text-red-600'>{stats.pending}</p>
         </div>
+        {/* In progress tasks */}
         <div className='bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-lg p-6'>
           <p className='text-gray-600 text-sm font-semibold mb-1'>In Progress</p>
           <p className='text-3xl font-bold text-yellow-600'>{stats.inProgress}</p>
         </div>
+        {/* Completed tasks */}
         <div className='bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-6'>
           <p className='text-gray-600 text-sm font-semibold mb-1'>Completed</p>
           <p className='text-3xl font-bold text-green-600'>{stats.completed}</p>
@@ -173,6 +186,7 @@ const EmployeeDashboard = () => {
                   <h2 className='text-2xl font-bold text-gray-800'>{task.title}</h2>
                   <p className='text-gray-600 mt-2'>{task.description}</p>
                 </div>
+                {/* Task status badge */}
                 <span className={`px-4 py-2 rounded-full font-semibold text-sm whitespace-nowrap ml-4 ${
                   task.status === 'completed' ? 'bg-green-100 text-green-800' :
                   task.status === 'in progress' ? 'bg-yellow-100 text-yellow-800' :
@@ -218,6 +232,7 @@ const EmployeeDashboard = () => {
               <div className='border-t pt-4 mb-4'>
                 <h3 className='font-bold text-gray-800 mb-3'>💬 Comments</h3>
                 <div className='space-y-2 max-h-40 overflow-y-auto mb-3 bg-gray-50 p-3 rounded'>
+                  {/* List of comments for this task */}
                   {task.comments?.length > 0 ? (
                     task.comments.map((c, i) => (
                       <div key={i} className='text-sm bg-white p-3 rounded border-l-4 border-blue-500'>
@@ -232,6 +247,7 @@ const EmployeeDashboard = () => {
                     <p className='text-gray-500 text-sm text-center py-2'>No comments yet</p>
                   )}
                 </div>
+                {/* Add a new comment */}
                 <div className='flex gap-2'>
                   <input
                     type='text'

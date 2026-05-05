@@ -4,8 +4,10 @@ import { toast } from 'react-toastify';
 import { login as loginService } from '../../services/authServices';
 import { useAuth } from '../../context/AuthContext';
 
+// Login component provides the login form and handles authentication
 const Login = () => {
 
+    // State for email, password, and error message
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -13,7 +15,7 @@ const Login = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
 
-    // two way banding
+    // Handle form submission for login
     const submitHandler = async (e) => {
         if (e && e.preventDefault) {
             e.preventDefault();
@@ -21,30 +23,31 @@ const Login = () => {
         console.log("Login");
 
         try {
+            // Call login service with email and password
             const res = await loginService({ email, password });
             const data = res.data;
 
             // Use context login helper which will persist token and user
             login(data);
 
-            // reset form fields
+            // Reset form fields
             setEmail("");
             setPassword("");
             setError("");
             toast.success("Login Successful");
 
-            // navigate based on role(admin,manager,employee)
+            // Navigate based on user role (admin, manager, employee)
             const role = data.user?.role;
             navigate(`/${role}`);
 
         } catch (error) {
-            // show error message from the server if available
+            // Show error message from the server if available
             setError(error.response?.data?.message || "Invalid Credentials")
         }
 
     }
-    // display login form
 
+    // Render the login form UI
     return (
         <div className='bg-gradient-to-br from-blue-600 to-blue-800 min-h-screen flex items-center justify-center px-4'>
             <div className='w-full max-w-md bg-white rounded-lg shadow-2xl p-8'>
@@ -56,6 +59,7 @@ const Login = () => {
                 <form onSubmit={submitHandler} className='space-y-4'>
                     <div>
                         <label className='block text-gray-700 font-semibold mb-2'>Email</label>
+                        {/* Email input */}
                         <input
                             onChange={(e) => setEmail(e.target.value)}
                             type="email"
@@ -68,6 +72,7 @@ const Login = () => {
 
                     <div>
                         <label className='block text-gray-700 font-semibold mb-2'>Password</label>
+                        {/* Password input */}
                         <input
                             onChange={(e) => setPassword(e.target.value)}
                             type="password"
@@ -78,6 +83,7 @@ const Login = () => {
                         />
                     </div>
 
+                    {/* Error message if login fails */}
                     {error && <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded'>{error}</div>}
 
                     <button type='submit'

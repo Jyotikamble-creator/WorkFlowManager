@@ -20,7 +20,8 @@ const ManagerDashboard = () => {
         setTasks(tasksResponse.data);
 
         const usersResponse = await api.get('/users');
-        setUsers(usersResponse.data);
+        // ManagerDashboard component displays the dashboard for managers
+        // Managers can view, filter, and update tasks, assign new tasks, and comment
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error('Failed to load data');

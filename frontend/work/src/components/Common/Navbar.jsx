@@ -2,10 +2,12 @@ import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
+// Navbar component displays the top navigation bar
 const Navbar = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
+  // Handle user logout and redirect to login page
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -13,9 +15,12 @@ const Navbar = () => {
 
   return (
     <nav className="bg-gradient-to-r from-blue-600 to-blue-800 text-white px-6 py-4 flex justify-between items-center shadow-lg">
+      {/* Logo and home link */}
       <Link to="/" className="text-2xl font-bold flex items-center gap-2">🚀 WorkflowManager</Link>
       <div className="space-x-6 flex items-center">
+        {/* Dashboard link */}
         <Link to="/dashboard" className="hover:text-blue-200 transition font-medium">Dashboard</Link>
+        {/* Logout button */}
         <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition font-medium">Logout</button>
       </div>
     </nav>

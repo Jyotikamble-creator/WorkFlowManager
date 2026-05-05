@@ -1,4 +1,6 @@
-// admin means the head of all the tasks who will moniter the employess
+// AdminDashboard.jsx
+// This component is the main dashboard for the Admin user.
+// Admin can view all users, assign tasks, and see all tasks in the system.
 import React, { useState, useEffect } from 'react'
 import api from '../../services/api'
 import { Link } from 'react-router-dom'
@@ -6,18 +8,23 @@ import { toast } from 'react-toastify'
 import Layout from '../Common/Layout'
 
 const AdminDashboard = () => {
+  // State to store all tasks
   const [tasks, setTasks] = useState([]);
+  // State to store all users (employees)
   const [users, setUsers] = useState([]);
+  // State for the new task form
   const [newTask, setNewTask] = useState({ title: "", description: "", assignedTo: "" });
 
   useEffect(() => {
+    // On mount, fetch all users and tasks from the backend
     const token = localStorage.getItem('token');
 
-    // fetch tasks and users(employees)
     const fetchData = async () => {
       try {
+        // Fetch all users (employees)
         const userResponse = await api.get('/users');
         setUsers(userResponse.data || []);
+        // Fetch all tasks
         const taskResponse = await api.get('/tasks');
         setTasks(taskResponse.data || []);
       } catch (err) {
@@ -27,12 +34,13 @@ const AdminDashboard = () => {
     fetchData()
   }, []);
 
+  // Handle form submission for creating a new task
   const handleTaskSubmit = async (e) => {
     e.preventDefault()
-    // updating the tasks
     try {
+      // Send new task data to backend
       const response = await api.post('/tasks', newTask);
-      setTasks([...tasks, response.data]);
+      setTasks([...tasks, response.data]); // Add new task to state
       toast.success("Task assigned successfully");
     } catch (error) {
       console.error(error);
@@ -40,18 +48,21 @@ const AdminDashboard = () => {
     }
   }
 
-  // display on the browser
+  // Render the Admin dashboard UI
   return (
     <div className="p-8">
+      {/* Dashboard Title */}
       <h1 className='text-4xl font-bold mb-8 text-gray-800'>👨‍💼 Admin Dashboard</h1>
       <div className='grid grid-cols-2 gap-8'>
 
-        {/* create new tasks */}
+        {/* Left: Create new tasks */}
         <div className='bg-white rounded-lg shadow-lg p-6'>
           <h2 className='text-2xl font-bold mb-6 text-gray-800 border-b pb-4'>📝 Create & Assign Task</h2>
+          {/* Task creation form */}
           <form onSubmit={handleTaskSubmit} className='space-y-4'>
             <div>
               <label className='block text-gray-700 font-semibold mb-2'>Task Title</label>
+              {/* Input for task title */}
               <input
                 placeholder='Enter task title'
                 value={newTask.title}
@@ -62,6 +73,7 @@ const AdminDashboard = () => {
 
             <div>
               <label className='block text-gray-700 font-semibold mb-2'>Description</label>
+              {/* Input for task description */}
               <textarea
                 placeholder='Enter task description'
                 value={newTask.description}
@@ -72,6 +84,7 @@ const AdminDashboard = () => {
 
             <div>
               <label className='block text-gray-700 font-semibold mb-2'>Assign to User</label>
+              {/* Dropdown to select user to assign task to */}
               <select
                 value={newTask.assignedTo}
                 onChange={e => setNewTask({ ...newTask, assignedTo: e.target.value })}
@@ -92,16 +105,19 @@ const AdminDashboard = () => {
           </form>
         </div>
 
+        {/* Right: List of all tasks */}
         <div className='bg-white rounded-lg shadow-lg p-6'>
-          {/* list of all tasks */}
           <h2 className='text-2xl font-bold mb-6 text-gray-800 border-b pb-4'>📋 All Tasks ({tasks.length})</h2>
+          {/* List all tasks assigned by admin */}
           <div className='space-y-4 max-h-96 overflow-y-auto'>
             {tasks.length > 0 ? (
               tasks.map(t => (
                 <div key={t._id} className='border border-gray-200 rounded-lg p-4 hover:shadow-md transition'>
+                  {/* Task title and description */}
                   <h3 className='font-bold text-lg text-gray-800'>{t.title}</h3>
                   <p className='text-gray-600 text-sm mt-1'>{t.description}</p>
                   <p className='text-gray-500 text-sm mt-2'>Assigned to: <span className='font-semibold text-blue-600'>{t.assignedTo?.name || t.assignedTo?.email || 'N/A'}</span></p>
+                  {/* Link to view task details */}
                   <Link to={`/task/${t._id}`} className='inline-block mt-3 text-blue-600 hover:text-blue-800 font-semibold'>→ View Details</Link>
                 </div>
               ))

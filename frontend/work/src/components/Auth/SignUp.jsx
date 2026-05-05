@@ -3,14 +3,16 @@ import { signup as signupService } from '../../services/authServices';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+// SignUp component provides the registration form for new users
 const SignUp = () => {
+  // State for email, password, role, and error message
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("employee");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // two way binding
+  // Handle form submission for signup
   const submitHandler = async (e) => {
     if (e && e.preventDefault) {
       e.preventDefault();
@@ -18,6 +20,7 @@ const SignUp = () => {
     console.log("Sign Up");
 
     try {
+      // Call signup service with form data
       await signupService({ name: email, email, password, role });
       setError("");
       toast.success("Registration Successful! Please login.");
@@ -28,6 +31,7 @@ const SignUp = () => {
 
   };
 
+  // Render the signup form UI
   return (
     <div className='bg-gradient-to-br from-green-600 to-green-800 min-h-screen flex items-center justify-center px-4'>
       <div className='w-full max-w-md bg-white rounded-lg shadow-2xl p-8'>
@@ -39,6 +43,7 @@ const SignUp = () => {
         <form onSubmit={submitHandler} className='space-y-4'>
           <div>
             <label className='block text-gray-700 font-semibold mb-2'>Email</label>
+            {/* Email input */}
             <input
               onChange={e => setEmail(e.target.value)}
               className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
@@ -51,6 +56,7 @@ const SignUp = () => {
 
           <div>
             <label className='block text-gray-700 font-semibold mb-2'>Password</label>
+            {/* Password input */}
             <input
               onChange={e => setPassword(e.target.value)}
               className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
@@ -63,6 +69,7 @@ const SignUp = () => {
 
           <div>
             <label className='block text-gray-700 font-semibold mb-2'>Role</label>
+            {/* Role selection dropdown */}
             <select
               value={role}
               onChange={e => setRole(e.target.value)}
@@ -73,6 +80,7 @@ const SignUp = () => {
             </select>
           </div>
 
+          {/* Error message if signup fails */}
           {error && <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded'>{error}</div>}
 
           <button type='submit'
