@@ -1,6 +1,9 @@
 
+
 // Import Task model for database operations
 const Task = require('../models/Task');
+// Import logger utility
+const logger = require('../utils/logger');
 
 
 // Create a new task
@@ -8,6 +11,7 @@ exports.createTask = async (req, res) => {
   // Extract task details from request body
   const { title, description, assignedTo } = req.body;
   try {
+    logger.info('TASK_CREATE', 'Creating new task', { title, assignedTo, createdBy: req.user.id });
     // Create new task instance with creator's user id
     const task = new Task({
       title,
@@ -17,11 +21,11 @@ exports.createTask = async (req, res) => {
     });
     // Save task to database
     await task.save();
+    logger.info('TASK_CREATE', 'Task created successfully', { taskId: task._id });
     // Respond with created task
     res.status(201).json(task);
   } catch (err) {
-    // Log and return server error
-    console.error('Error creating task:', err);
+    logger.error('TASK_CREATE', 'Error creating task', err);
     res.status(500).json({ message: 'Server error while creating task' });
   }
 };
@@ -30,17 +34,17 @@ exports.createTask = async (req, res) => {
 // Get all tasks
 exports.getTasks = async (req, res) => {
   try {
+    logger.info('TASK_FETCH', 'Fetching all tasks');
     // Find all tasks and populate related user and comment info
     const tasks = await Task.find()
       .populate('assignedTo', 'name email role') // Populate assigned user info
       .populate('createdBy', 'name email role') // Populate creator info
       .populate({ path: 'comments', populate: { path: 'createdBy', select: 'name' } }); // Populate comments and their creators
-
+    logger.info('TASK_FETCH', 'Tasks fetched', { count: tasks.length });
     // Respond with all tasks
     res.json(tasks);
   } catch (err) {
-    // Log and return server error
-    console.error('Error fetching tasks:', err);
+    logger.error('TASK_FETCH', 'Error fetching tasks', err);
     res.status(500).json({ message: 'Server error while fetching tasks' });
   }
 };
@@ -49,6 +53,7 @@ exports.getTasks = async (req, res) => {
 // Get task by ID
 exports.getTaskById = async (req, res) => {
   try {
+    logger.info('TASK_FETCH', 'Fetching task by ID', { id: req.params.id });
     // Find task by ID and populate related info
     const task = await Task.findById(req.params.id)
       .populate('assignedTo', 'name email')
@@ -56,12 +61,15 @@ exports.getTaskById = async (req, res) => {
       .populate({ path: 'comments', populate: { path: 'createdBy', select: 'name' } });
 
     // If task not found, return 404
-    if (!task) return res.status(404).json({ message: 'Task not found' });
+    if (!task) {
+      logger.warn('TASK_FETCH', 'Task not found', { id: req.params.id });
+      return res.status(404).json({ message: 'Task not found' });
+    }
+    logger.info('TASK_FETCH', 'Task fetched', { id: req.params.id });
     // Respond with the task
     res.json(task);
   } catch (err) {
-    // Log and return server error
-    console.error('Error retrieving task:', err);
+    logger.error('TASK_FETCH', 'Error retrieving task', err);
     res.status(500).json({ message: 'Server error while retrieving task' });
   }
 };
@@ -73,20 +81,23 @@ exports.updateTaskStatus = async (req, res) => {
   const { taskId } = req.params;
   const { status } = req.body;
   try {
+    logger.info('TASK_STATUS', 'Updating task status', { taskId, status, userId: req.user.id });
     // Find task by ID
     const task = await Task.findById(taskId);
-    if (!task) return res.status(404).json({ message: 'Task not found' });
+    if (!task) {
+      logger.warn('TASK_STATUS', 'Task not found', { taskId });
+      return res.status(404).json({ message: 'Task not found' });
+    }
 
     // Update status and add to history
     task.status = status;
     task.history.push({ action: `Status changed to ${status}`, by: req.user.id });
     await task.save();
-
+    logger.info('TASK_STATUS', 'Task status updated', { taskId, status });
     // Respond with updated task
     res.json(task);
   } catch (err) {
-    // Log and return server error
-    console.error('Error updating task status:', err);
+    logger.error('TASK_STATUS', 'Error updating task status', err);
     res.status(500).json({ message: 'Server error while updating task status' });
   }
 };
@@ -95,15 +106,18 @@ exports.updateTaskStatus = async (req, res) => {
 // Delete task
 exports.deleteTask = async (req, res) => {
   try {
+    logger.info('TASK_DELETE', 'Deleting task', { id: req.params.id });
     // Find and delete task by ID
     const task = await Task.findByIdAndDelete(req.params.id);
-    if (!task) return res.status(404).json({ message: 'Task not found' });
-
+    if (!task) {
+      logger.warn('TASK_DELETE', 'Task not found', { id: req.params.id });
+      return res.status(404).json({ message: 'Task not found' });
+    }
+    logger.info('TASK_DELETE', 'Task deleted', { id: req.params.id });
     // Respond with success message
     res.json({ message: 'Task deleted successfully' });
   } catch (err) {
-    // Log and return server error
-    console.error('Error deleting task:', err);
+    logger.error('TASK_DELETE', 'Error deleting task', err);
     res.status(500).json({ message: 'Server error while deleting task' });
   }
 };

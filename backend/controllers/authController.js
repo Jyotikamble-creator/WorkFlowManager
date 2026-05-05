@@ -1,10 +1,13 @@
 
+
 // Import User model for database operations
 const User = require('../models/User.js'); 
 // Import bcrypt for password hashing
 const bcrypt = require('bcrypt'); 
 // Import jsonwebtoken for JWT token creation
 const jwt = require('jsonwebtoken');
+// Import logger utility
+const logger = require('../utils/logger');
 
 
 // Register a new user
@@ -13,9 +16,11 @@ exports.register = async (req, res) => {
   const { name, email, password, role } = req.body;
 
   try {
+    logger.info('AUTH_REGISTER', 'Register attempt', { email, name, role });
     // Check if user already exists by email
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      logger.warn('AUTH_REGISTER', 'User already exists', { email });
       // If user exists, return error
       return res.status(400).json({ message: 'User already exists' });
     }
@@ -33,12 +38,12 @@ exports.register = async (req, res) => {
 
     // Save user to database
     await newUser.save();
+    logger.info('AUTH_REGISTER', 'User registered successfully', { userId: newUser._id });
 
     // Respond with success message
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
-    // Log and return server error
-    console.error('Registration Error:', err);
+    logger.error('AUTH_REGISTER', 'Registration Error', err);
     res.status(500).json({ message: 'Server error during registration' });
   }
 };
@@ -50,10 +55,12 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    logger.info('AUTH_LOGIN', 'Login attempt', { email });
     // Find user by email
     const user = await User.findOne({ email });
     // If user not found or password does not match, return error
     if (!user || !(await bcrypt.compare(password, user.password))) {
+      logger.warn('AUTH_LOGIN', 'Invalid credentials', { email });
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
@@ -63,6 +70,8 @@ exports.login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
+
+    logger.info('AUTH_LOGIN', 'Login successful', { userId: user._id, role: user.role });
 
     // Respond with token and user info (excluding password)
     res.status(200).json({
@@ -74,8 +83,7 @@ exports.login = async (req, res) => {
       }
     });
   } catch (err) {
-    // Log and return server error
-    console.error('Login Error:', err);
+    logger.error('AUTH_LOGIN', 'Login Error', err);
     res.status(500).json({ message: 'Server error during login' });
   }
 };

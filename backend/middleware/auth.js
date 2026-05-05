@@ -1,6 +1,9 @@
 
+
 // Import jsonwebtoken for verifying JWT tokens
 const jwt = require("jsonwebtoken");
+// Import logger utility
+const logger = require('../utils/logger');
 
 
 // Authentication middleware to verify JWT token
@@ -10,6 +13,7 @@ const auth = async (req, res, next) => {
 
   // Check if header exists and starts with 'Bearer '
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    logger.warn('AUTH_MIDDLEWARE', 'Missing or invalid Authorization header');
     return res.status(401).json({ message: "Unauthorized" });
   }
 
@@ -21,8 +25,10 @@ const auth = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     // Attach decoded user info to request object
     req.user = decoded;
+    logger.info('AUTH_MIDDLEWARE', 'Token verified', { userId: decoded.id, role: decoded.role });
     next(); // Proceed to next middleware/route
   } catch (err) {
+    logger.warn('AUTH_MIDDLEWARE', 'Invalid token', err);
     // If token is invalid, return 401
     return res.status(401).json({ message: "Invalid token" });
   }
