@@ -1,32 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
+import { toast } from 'react-toastify';
 
 const EmployeeDashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [commentText, setCommentText] = useState({});
+  const [loading, setLoading] = useState(false);
 
   // Fetch tasks assigned to the employee from the backend
   useEffect(() => {
     const fetchTasks = async () => {
+      setLoading(true);
       try {
         const response = await api.get('/tasks/employee');
         setTasks(response.data);
       } catch (error) {
         console.error('Error fetching tasks:', error);
+        toast.error('Failed to load tasks');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchTasks();
   }, []);
 
-  // Update task status by the employee(backend)
+  // Update task status by the employee
   const updateStatus = async (taskID, status) => {
     try {
-      await api.put(`/tasks/${taskID}/status`, { status });
-      window.location.reload();
+      await api.put(`/tasks/${taskID}`, { status });
+      setTasks(tasks.map(t => t._id === taskID ? { ...t, status } : t));
+      toast.success('Task status updated!');
     } catch (error) {
       console.error('Error updating status:', error);
+      toast.error('Failed to update status');
     }
   };
 
@@ -40,140 +49,235 @@ const EmployeeDashboard = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      alert('Work submitted!');
-      window.location.reload();
+      toast.success('Work submitted successfully!');
+      e.target.reset();
+      // Refresh tasks
+      const response = await api.get('/tasks/employee');
+      setTasks(response.data);
     } catch (error) {
       console.error('Error submitting work:', error);
+      toast.error('Failed to submit work');
     }
   };
 
-  // Handle comment submission by the employee
+  // Handle comment submission
   const handleCommentSubmit = async (taskId) => {
+    const text = commentText[taskId]?.trim();
+    if (!text) {
+      toast.warning('Comment cannot be empty');
+      return;
+    }
     try {
-      await api.post(`/tasks/${taskId}/comments`, {
-        text: commentText[taskId],
-      });
+      await api.post(`/comments/${taskId}`, { text });
       setCommentText(prev => ({ ...prev, [taskId]: '' }));
-      window.location.reload();
+      // Refresh tasks to show new comment
+      const response = await api.get('/tasks/employee');
+      setTasks(response.data);
+      toast.success('Comment added!');
     } catch (error) {
       console.error('Error submitting comment:', error);
+      toast.error('Failed to add comment');
     }
   };
 
-  const filteredTasks = tasks.filter(task =>
-    statusFilter === 'all' ? true : task.status === statusFilter
-  );
+  // Filter and search tasks
+  const filteredTasks = tasks.filter(task => {
+    const matchesStatus = statusFilter === 'all' ? true : task.status === statusFilter;
+    const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         task.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
+
+  // Calculate stats
+  const stats = {
+    total: tasks.length,
+    pending: tasks.filter(t => t.status === 'open' || t.status === 'pending').length,
+    inProgress: tasks.filter(t => t.status === 'in progress').length,
+    completed: tasks.filter(t => t.status === 'completed').length,
+  };
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <h1 className="text-4xl font-bold mb-8 text-gray-800">👤 Employee Dashboard</h1>
-
-      {/* Filter dropdown of the tasks result */}
-      <div className="mb-8 flex items-center gap-4">
-        <label className="font-semibold text-gray-700">Filter by Status:</label>
-        <select
-          className="border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}>
-          <option value="all">All Tasks</option>
-          <option value="pending">Pending</option>
-          <option value="in progress">In Progress</option>
-          <option value="completed">Completed</option>
-        </select>
-        <span className='text-gray-600'>({filteredTasks.length} tasks)</span>
+    <div className='p-8 bg-gray-50 min-h-screen'>
+      {/* Header */}
+      <div className='mb-8'>
+        <h1 className='text-4xl font-bold text-gray-800 mb-2'>👨‍💼 Employee Dashboard</h1>
+        <p className='text-gray-600'>View and manage your assigned tasks</p>
       </div>
 
-      {/* display the tasks */}
-      {filteredTasks.length === 0 ? (
-        <div className='text-center py-12 bg-white rounded-lg'>
+      {/* Stats Cards */}
+      <div className='grid grid-cols-4 gap-4 mb-8'>
+        <div className='bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6'>
+          <p className='text-gray-600 text-sm font-semibold mb-1'>Total Assigned</p>
+          <p className='text-3xl font-bold text-blue-600'>{stats.total}</p>
+        </div>
+        <div className='bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-lg p-6'>
+          <p className='text-gray-600 text-sm font-semibold mb-1'>Pending</p>
+          <p className='text-3xl font-bold text-red-600'>{stats.pending}</p>
+        </div>
+        <div className='bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-lg p-6'>
+          <p className='text-gray-600 text-sm font-semibold mb-1'>In Progress</p>
+          <p className='text-3xl font-bold text-yellow-600'>{stats.inProgress}</p>
+        </div>
+        <div className='bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-6'>
+          <p className='text-gray-600 text-sm font-semibold mb-1'>Completed</p>
+          <p className='text-3xl font-bold text-green-600'>{stats.completed}</p>
+        </div>
+      </div>
+
+      {/* Filter and Search */}
+      <div className='bg-white rounded-lg shadow-md p-6 mb-8'>
+        <div className='grid grid-cols-2 gap-4'>
+          <div>
+            <label className='block text-gray-700 font-semibold mb-2'>Filter by Status</label>
+            <select 
+              value={statusFilter} 
+              onChange={(e) => setStatusFilter(e.target.value)} 
+              className='w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+            >
+              <option value='all'>All Tasks ({stats.total})</option>
+              <option value='pending'>Pending ({stats.pending})</option>
+              <option value='in progress'>In Progress ({stats.inProgress})</option>
+              <option value='completed'>Completed ({stats.completed})</option>
+            </select>
+          </div>
+          <div>
+            <label className='block text-gray-700 font-semibold mb-2'>Search Tasks</label>
+            <input 
+              type='text'
+              placeholder='Search by title or description...'
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className='w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Tasks Display */}
+      {loading ? (
+        <div className='text-center py-12'>
+          <p className='text-gray-500 text-lg'>Loading tasks...</p>
+        </div>
+      ) : filteredTasks.length === 0 ? (
+        <div className='text-center py-12 bg-white rounded-lg border border-gray-200'>
           <p className='text-gray-500 text-lg'>📭 No tasks assigned to you yet</p>
+          <p className='text-gray-400 mt-2'>{searchQuery ? 'Try adjusting your search' : 'Check back soon for new assignments!'}</p>
         </div>
       ) : (
         <div className='space-y-4'>
-        {filteredTasks.map((task) => (
-          <div key={task._id} className="bg-white border border-gray-200 rounded-lg shadow hover:shadow-lg transition p-6">
-            <div className='flex justify-between items-start mb-3'>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800">{task.title}</h2>
-                <p className="text-gray-600 mt-2">{task.description}</p>
-              </div>
-              <span className={`px-4 py-2 rounded-full font-semibold text-sm ${
-                task.status === 'completed' ? 'bg-green-100 text-green-800' :
-                task.status === 'in progress' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
-              }`}>{task.status.toUpperCase()}</span>
-            </div>
-
-            <div className="my-4 flex gap-2">
-              <button
-                onClick={() => updateStatus(task._id, 'in progress')}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded transition font-semibold">
-                📊 In Progress
-              </button>
-              <button
-                onClick={() => updateStatus(task._id, 'completed')}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition font-semibold">
-                ✓ Mark Completed
-              </button>
-            </div>
-
-            {/* Comments  by the employee on the tasks*/}
-            <div className="mt-6 border-t pt-4">
-              <h3 className="font-semibold text-gray-800 mb-3">💬 Comments</h3>
-              <div className='space-y-2 max-h-32 overflow-y-auto mb-3'>
-                {task.comments?.length > 0 ? (
-                  task.comments.map((c, i) => (
-                    <div key={i} className="text-sm bg-gray-50 p-2 rounded border-l-4 border-blue-500">
-                      <p className='font-semibold text-gray-800'>{c.createdBy?.name || 'Anonymous'}</p>
-                      <p className="text-gray-700">{c.text}</p>
-                      <p className="text-xs text-gray-500">{new Date(c.createdAt).toLocaleString()}</p>
-                    </div>
-                  ))
-                ) : (
-                  <p className='text-gray-500 text-sm'>No comments yet</p>
-                )}
+          {filteredTasks.map((task) => (
+            <div key={task._id} className='bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition p-6'>
+              {/* Task Header */}
+              <div className='flex justify-between items-start mb-4'>
+                <div>
+                  <h2 className='text-2xl font-bold text-gray-800'>{task.title}</h2>
+                  <p className='text-gray-600 mt-2'>{task.description}</p>
+                </div>
+                <span className={`px-4 py-2 rounded-full font-semibold text-sm whitespace-nowrap ml-4 ${
+                  task.status === 'completed' ? 'bg-green-100 text-green-800' :
+                  task.status === 'in progress' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
+                }`}>{task.status.toUpperCase()}</span>
               </div>
 
-              {/* submission of the comments */}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Add a comment..."
-                  className="border border-gray-300 flex-1 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={commentText[task._id] || ''}
-                  onChange={(e) =>
-                    setCommentText({ ...commentText, [task._id]: e.target.value })
-                  }
-                />
+              {/* Task Info Grid */}
+              <div className='grid grid-cols-3 gap-4 mb-4 bg-gray-50 p-4 rounded-lg'>
+                <div>
+                  <p className='text-gray-500 text-xs font-semibold uppercase'>Created By</p>
+                  <p className='text-gray-800 font-semibold'>{task.createdBy?.name || 'Manager'}</p>
+                </div>
+                <div>
+                  <p className='text-gray-500 text-xs font-semibold uppercase'>Priority</p>
+                  <p className='text-gray-800 font-semibold'>High</p>
+                </div>
+                <div>
+                  <p className='text-gray-500 text-xs font-semibold uppercase'>Status</p>
+                  <p className='text-gray-800 font-semibold capitalize'>{task.status}</p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className='flex gap-2 mb-6'>
                 <button
-                  onClick={() => handleCommentSubmit(task._id)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition font-semibold"
+                  onClick={() => updateStatus(task._id, 'in progress')}
+                  disabled={task.status === 'completed'}
+                  className='flex-1 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg transition font-semibold flex items-center justify-center gap-2'
                 >
-                  Send
+                  📊 Start Progress
+                </button>
+                <button
+                  onClick={() => updateStatus(task._id, 'completed')}
+                  disabled={task.status === 'completed'}
+                  className='flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg transition font-semibold flex items-center justify-center gap-2'
+                >
+                  ✓ Mark Complete
                 </button>
               </div>
+
+              {/* Comments Section */}
+              <div className='border-t pt-4 mb-4'>
+                <h3 className='font-bold text-gray-800 mb-3'>💬 Comments</h3>
+                <div className='space-y-2 max-h-40 overflow-y-auto mb-3 bg-gray-50 p-3 rounded'>
+                  {task.comments?.length > 0 ? (
+                    task.comments.map((c, i) => (
+                      <div key={i} className='text-sm bg-white p-3 rounded border-l-4 border-blue-500'>
+                        <div className='flex justify-between items-start'>
+                          <p className='font-semibold text-gray-800'>{c.createdBy?.name || 'Anonymous'}</p>
+                          <span className='text-xs text-gray-500'>{new Date(c.createdAt).toLocaleString()}</span>
+                        </div>
+                        <p className='text-gray-700 mt-1'>{c.text}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className='text-gray-500 text-sm text-center py-2'>No comments yet</p>
+                  )}
+                </div>
+                <div className='flex gap-2'>
+                  <input
+                    type='text'
+                    placeholder='Add a comment...'
+                    className='flex-1 border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm'
+                    value={commentText[task._id] || ''}
+                    onChange={(e) => setCommentText({ ...commentText, [task._id]: e.target.value })}
+                    onKeyPress={(e) => e.key === 'Enter' && handleCommentSubmit(task._id)}
+                  />
+                  <button
+                    onClick={() => handleCommentSubmit(task._id)}
+                    className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition font-semibold'
+                  >
+                    Send
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit Work Section */}
+              <form
+                onSubmit={(e) => handleSubmitWork(e, task._id)}
+                encType='multipart/form-data'
+                className='border-t pt-4'
+              >
+                <h3 className='font-bold text-gray-800 mb-3'>📤 Submit Work</h3>
+                <textarea
+                  placeholder='Describe your completed work...'
+                  name='note'
+                  className='border border-gray-300 p-3 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3 resize-none h-20'
+                />
+                <div className='mb-3'>
+                  <input 
+                    type='file' 
+                    name='file' 
+                    className='block text-sm text-gray-700 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'
+                  />
+                </div>
+                <button 
+                  type='submit'
+                  className='w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-3 rounded-lg transition'
+                >
+                  📤 Submit Work
+                </button>
+              </form>
             </div>
-
-            {/* Submit completed work */}
-            <form
-              onSubmit={(e) => handleSubmitWork(e, task._id)}
-              encType="multipart/form-data"
-              className="mt-6 border-t pt-4"
-            >
-              <h3 className="font-semibold text-gray-800 mb-3">📤 Submit Work</h3>
-              <textarea
-                placeholder="Describe your completed work..."
-                name="note"
-                className="border border-gray-300 p-3 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
-              />
-
-              <input type="file" name="file" className="block mb-3 text-gray-700" />
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded transition">
-                📤 Submit Work
-              </button>
-            </form>
-          </div>
-        ))}
+          ))}
         </div>
       )}
     </div>
