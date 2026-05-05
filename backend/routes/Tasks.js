@@ -1,9 +1,11 @@
+
+// Task routes for CRUD operations and filtering by user role
 const auth = require("../middleware/auth");
 const Task = require("../models/Task");
 const router = require("express").Router();
 
-
 // Get tasks assigned to the logged-in employee
+// GET /api/tasks/employee
 router.get('/employee', auth, async (req, res) => {
     try {
         const tasks = await Task.find({ assignedTo: req.user.id || req.user._id })
@@ -18,6 +20,7 @@ router.get('/employee', auth, async (req, res) => {
 });
 
 // Get tasks assigned by the logged-in manager
+// GET /api/tasks/manager
 router.get('/manager', auth, async (req, res) => {
     try {
         const tasks = await Task.find({ createdBy: req.user.id || req.user._id })
@@ -31,7 +34,8 @@ router.get('/manager', auth, async (req, res) => {
     }
 });
 
-// Get/read all tasks by id
+// Get a single task by ID
+// GET /api/tasks/:id
 router.get('/:id', auth, async (req, res) => {
     try {
         const task = await Task.findById(req.params.id)
@@ -46,7 +50,8 @@ router.get('/:id', auth, async (req, res) => {
     }
 });
 
-// get single task
+// Get all tasks
+// GET /api/tasks/
 router.get('/', auth, async (req, res) => {
     try {
         const tasks = await Task.find()
@@ -62,7 +67,8 @@ router.get('/', auth, async (req, res) => {
 
 
 
-// create a new task
+// Create a new task
+// POST /api/tasks/
 router.post('/', auth, async (req, res) => {
     try {
         const task = new Task({ ...req.body, createdBy: req.user.id || req.user._id });
@@ -74,7 +80,8 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
-// Update a task
+// Update a task by ID
+// PUT /api/tasks/:id
 router.put('/:id', auth, async (req, res) => {
     try {
         const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -86,6 +93,8 @@ router.put('/:id', auth, async (req, res) => {
     }
 });
 
+// Delete a task by ID
+// DELETE /api/tasks/:id
 router.delete('/:id', auth, async (req, res) => {
     try {
         const task = await Task.findByIdAndDelete(req.params.id);
@@ -97,6 +106,8 @@ router.delete('/:id', auth, async (req, res) => {
     }
 });
 
+// Add a comment to a task (not used in main flow, kept for reference)
+// POST /api/tasks/:id/comment
 router.post('/:id/comment', auth, async (req, res) => {
     try {
         const task = await Task.findById(req.params.id);
@@ -110,6 +121,7 @@ router.post('/:id/comment', auth, async (req, res) => {
     }
 });
 
+// Export the router to be used in server.js
 module.exports=router;
 
 
