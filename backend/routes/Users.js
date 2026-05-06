@@ -1,9 +1,11 @@
 
 // User routes for listing users with role-based access
+
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const auth = require("../middleware/auth");
+const logger = require('../utils/logger');
 
 
 // GET /api/users
@@ -12,37 +14,26 @@ const auth = require("../middleware/auth");
 // - Manager: only employees
 // - Employee: only themselves
 router.get('/', auth, async (req, res) => {
+    logger.info('ROUTE_USER', 'GET / called', { userId: req.user.id, role: req.user.role });
     try {
-        // Log request and extract user info from JWT
-        console.log('=== /api/users request ===');
-        console.log('req.user:', req.user);
-        
         const { role, id } = req.user;
-        console.log('Extracted role:', role, 'id:', id);
-        
         // Build query based on user role
         let query = {};
         if (role === 'manager') {
-            // Managers see only employees
             query = { role: 'employee' };
-            console.log('Manager query:', query);
+            logger.debug('ROUTE_USER', 'Manager query', query);
         } else if (role === 'employee') {
-            // Employees see only themselves
             query = { _id: id };
-            console.log('Employee query:', query);
+            logger.debug('ROUTE_USER', 'Employee query', query);
         } else {
-            // Admins see everyone (empty query)
-            console.log('Admin query (empty)');
+            logger.debug('ROUTE_USER', 'Admin query (empty)');
         }
-        
         // Find users based on query, exclude password field
         const users = await User.find(query).select('-password');
-        console.log('Found users:', users.length);
-        // Respond with user list
+        logger.info('ROUTE_USER', 'Users fetched', { count: users.length });
         res.json(users);
     } catch (err) {
-        // Log and return server error
-        console.error('Error fetching users:', err);
+        logger.error('ROUTE_USER', 'Error fetching users', err);
         res.status(500).json({ message: 'Server error while fetching users' });
     }
 });
