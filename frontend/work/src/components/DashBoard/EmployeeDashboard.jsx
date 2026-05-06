@@ -3,6 +3,10 @@
 // EmployeeDashboard component displays the dashboard for employees.
 // Employees can view, filter, and update their assigned tasks, submit work, and comment on tasks.
 // This component fetches tasks, allows status updates, work submission, and commenting.
+
+import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
+import api from '../../services/api';
 import { clientLogger, LogTags } from '../../utils/logger';
 
 

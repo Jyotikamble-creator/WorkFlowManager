@@ -26,8 +26,7 @@ const Login = () => {
 
         try {
             // Call login service with email and password
-            const res = await loginService({ email, password });
-            const data = res.data;
+            const data = await loginService({ email, password });
 
             // Use context login helper which will persist token and user
             login(data);
