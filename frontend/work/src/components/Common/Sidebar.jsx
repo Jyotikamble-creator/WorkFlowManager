@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { clientLogger, LogTags } from '../../utils/logger';
@@ -8,6 +8,10 @@ import { clientLogger, LogTags } from '../../utils/logger';
 const Sidebar = () => {
   const { user } = useAuth();
   const role = user?.role;
+
+  useEffect(() => {
+    clientLogger.debug(LogTags.PAGE_LOAD, 'Sidebar rendered', { role });
+  }, [role]);
 
   return (
     <aside className="w-64 bg-gray-900 text-white h-screen p-6 border-r border-gray-700">
@@ -24,9 +28,6 @@ const Sidebar = () => {
       </ul>
     </aside>
   );
-  useEffect(() => {
-    clientLogger.debug(LogTags.PAGE_LOAD, 'Sidebar rendered', { role });
-  }, [role]);
 };
 
 export default Sidebar;
