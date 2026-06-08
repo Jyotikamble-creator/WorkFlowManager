@@ -9,12 +9,14 @@ import EmployeeDashboard from '../components/DashBoard/EmployeeDashboard';
 import ManagerDashboard from '../components/DashBoard/ManagerDashboard';
 import WorkDescription from '../components/DashBoard/WorkDescription';
 
+import LandingPage from '../pages/LandingPage';
+
 // AppRoutes defines all the routes for the application
 // Uses ProtectionRoute to guard role-based dashboards
 const AppRoutes = () => (
   <Routes>
     {/* Public routes */}
-    <Route path="/" element={<Login />} />
+    <Route path="/" element={<LandingPage />} />
     <Route path="/login" element={<Login />} />
     <Route path="/signup" element={<SignUp />} />
 

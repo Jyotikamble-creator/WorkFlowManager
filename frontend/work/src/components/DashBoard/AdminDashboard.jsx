@@ -1,140 +1,354 @@
-// AdminDashboard.jsx
-// This component is the main dashboard for the Admin user.
-// Admin can view all users, assign tasks, and see all tasks in the system.
-
-import React, { useState, useEffect } from 'react'
-import api from '../../services/api'
-import { Link } from 'react-router-dom'
-import { toast } from 'react-toastify'
-import Layout from '../Common/Layout'
+import React, { useState, useEffect } from 'react';
+import api from '../../services/api';
+import { toast } from 'react-toastify';
 import { clientLogger, LogTags } from '../../utils/logger';
+import { Link } from 'react-router-dom';
 
 const AdminDashboard = () => {
-  // State to store all tasks
   const [tasks, setTasks] = useState([]);
-  // State to store all users (employees)
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [commentInputs, setCommentInputs] = useState({});
+  const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
-  // State for the new task form
-  const [newTask, setNewTask] = useState({ title: "", description: "", assignedTo: "" });
+  const [taskForm, setTaskForm] = useState({ title: '', description: '', assignedTo: '' });
 
+  // Read all tasks and users for the admin
   useEffect(() => {
     clientLogger.info(LogTags.PAGE_LOAD, 'AdminDashboard loaded');
-    // On mount, fetch all users and tasks from the backend
-    const token = localStorage.getItem('token');
-
     const fetchData = async () => {
+      setLoading(true);
       try {
-        // Fetch all users (employees)
-        const userResponse = await api.get('/users');
-        setUsers(userResponse.data || []);
-        // Fetch all tasks
-        const taskResponse = await api.get('/tasks');
-        setTasks(taskResponse.data || []);
-        clientLogger.info(LogTags.TASK_FETCH, 'Admin fetched users and tasks');
-      } catch (err) {
-        clientLogger.error(LogTags.TASK_FETCH, 'Error fetching admin data', err);
+        const tasksResponse = await api.get('/tasks');
+        setTasks(tasksResponse.data);
+        const usersResponse = await api.get('/users');
+        setUsers(usersResponse.data);
+        clientLogger.info(LogTags.TASK_FETCH, 'Admin fetched all tasks and users');
+      } catch (error) {
+        clientLogger.error(LogTags.TASK_FETCH, 'Error fetching admin data', error);
+        toast.error('Failed to load data');
+      } finally {
+        setLoading(false);
       }
-    }
-    fetchData()
+    };
+    fetchData();
   }, []);
 
-  // Handle form submission for creating a new task
-  const handleTaskSubmit = async (e) => {
-    e.preventDefault()
-    clientLogger.info(LogTags.TASK_CREATE, 'Admin creating new task', newTask);
+  // Update task status
+  const updateStatus = async (id, status) => {
+    clientLogger.info(LogTags.TASK_STATUS, `Admin updating status for task ${id} to ${status}`);
     try {
-      // Send new task data to backend
-      const response = await api.post('/tasks', newTask);
-      setTasks([...tasks, response.data]); // Add new task to state
-      toast.success("Task assigned successfully");
-      clientLogger.info(LogTags.TASK_CREATE, 'Task assigned successfully', response.data);
+      await api.put(`/tasks/${id}`, { status });
+      setTasks(tasks.map(t => t._id === id ? { ...t, status } : t));
+      toast.success('Task status updated!');
+      clientLogger.info(LogTags.TASK_STATUS, `Task ${id} status updated to ${status}`);
     } catch (error) {
-      clientLogger.error(LogTags.TASK_CREATE, 'Failed to create task', error);
-      toast.error("Failed to create task");
+      clientLogger.error(LogTags.TASK_STATUS, `Error updating status for task ${id}`, error);
+      toast.error('Failed to update status');
     }
-  }
+  };
 
-  // Render the Admin dashboard UI
+  // Create new task
+  const handleCreateTask = async (e) => {
+    e.preventDefault();
+    if (!taskForm.title.trim() || !taskForm.assignedTo) {
+      toast.warning('Please fill in all required fields');
+      return;
+    }
+    clientLogger.info(LogTags.TASK_CREATE, 'Admin creating new task', taskForm);
+    try {
+      const response = await api.post('/tasks', taskForm);
+      setTasks([...tasks, response.data]);
+      setTaskForm({ title: '', description: '', assignedTo: '' });
+      toast.success('Task created successfully!');
+      clientLogger.info(LogTags.TASK_CREATE, 'Task created successfully', response.data);
+    } catch (error) {
+      clientLogger.error(LogTags.TASK_CREATE, 'Error creating task', error);
+      toast.error('Failed to create task');
+    }
+  };
+
+  // Add comment
+  const handleCommentSubmit = async (taskId) => {
+    const text = commentInputs[taskId]?.trim();
+    if (!text) {
+      toast.warning('Comment cannot be empty');
+      return;
+    }
+    clientLogger.info(LogTags.COMMENT_ADD, `Admin adding comment to task ${taskId}`);
+    try {
+      await api.post(`/comments/${taskId}`, { text });
+      setCommentInputs({ ...commentInputs, [taskId]: "" });
+      // Refresh tasks to show new comment
+      const response = await api.get('/tasks');
+      setTasks(response.data);
+      toast.success('Comment added!');
+      clientLogger.info(LogTags.COMMENT_ADD, `Comment added to task ${taskId}`);
+    } catch (error) {
+      clientLogger.error(LogTags.COMMENT_ADD, `Error adding comment to task ${taskId}`, error);
+      toast.error('Failed to add comment');
+    }
+  };
+
+  // Filter tasks based on status and search
+  const filteredTasks = tasks.filter(task => {
+    const matchesStatus = statusFilter === "all" ? true : task.status === statusFilter;
+    const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         task.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
+
+  // Calculate stats
+  const stats = {
+    total: tasks.length,
+    pending: tasks.filter(t => t.status === 'open' || t.status === 'pending').length,
+    inProgress: tasks.filter(t => t.status === 'in progress').length,
+    completed: tasks.filter(t => t.status === 'completed').length,
+  };
+
   return (
-    <div className="p-8">
-      {/* Dashboard Title */}
-      <h1 className='text-4xl font-bold mb-8 text-gray-800'>👨‍💼 Admin Dashboard</h1>
-      <div className='grid grid-cols-2 gap-8'>
+    <div className='p-8 bg-gray-50 min-h-screen'>
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className='text-4xl font-bold text-gray-800 mb-2'>👨‍💼 Admin Dashboard</h1>
+        <p className='text-gray-600'>Complete overview and management of all tasks across the organization</p>
+      </div>
 
-        {/* Left: Create new tasks */}
-        <div className='bg-white rounded-lg shadow-lg p-6'>
-          <h2 className='text-2xl font-bold mb-6 text-gray-800 border-b pb-4'>📝 Create & Assign Task</h2>
-          {/* Task creation form */}
-          <form onSubmit={handleTaskSubmit} className='space-y-4'>
+      {/* Task Creation Form */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8 border-l-4 border-indigo-500">
+        <h2 className='text-2xl font-bold text-gray-800 mb-4'>📝 Create & Assign Task</h2>
+        <form onSubmit={handleCreateTask} className='space-y-4'>
+          <div className='grid grid-cols-2 gap-4'>
             <div>
-              <label className='block text-gray-700 font-semibold mb-2'>Task Title</label>
-              {/* Input for task title */}
+              <label className='block text-gray-700 font-semibold mb-2'>Task Title *</label>
               <input
+                type='text'
                 placeholder='Enter task title'
-                value={newTask.title}
-                onChange={e => setNewTask({ ...newTask, title: e.target.value })}
-                className='w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+                value={taskForm.title}
+                onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
+                className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500'
               />
             </div>
-
             <div>
-              <label className='block text-gray-700 font-semibold mb-2'>Description</label>
-              {/* Input for task description */}
-              <textarea
-                placeholder='Enter task description'
-                value={newTask.description}
-                onChange={e => setNewTask({ ...newTask, description: e.target.value })}
-                className='w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-24'
-              />
-            </div>
-
-            <div>
-              <label className='block text-gray-700 font-semibold mb-2'>Assign to User</label>
-              {/* Dropdown to select user to assign task to */}
+              <label className='block text-gray-700 font-semibold mb-2'>Assign to User *</label>
               <select
-                value={newTask.assignedTo}
-                onChange={e => setNewTask({ ...newTask, assignedTo: e.target.value })}
-                className='w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                required
+                value={taskForm.assignedTo}
+                onChange={(e) => setTaskForm({ ...taskForm, assignedTo: e.target.value })}
+                className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500'
               >
-                <option value="">Select a user</option>
+                <option value=''>Select a user</option>
                 {users.map(user => (
-                  <option key={user._id} value={user._id}>{user.name || user.email}
-                  </option>
+                  <option key={user._id} value={user._id}>{user.name || user.email} ({user.role})</option>
                 ))}
               </select>
             </div>
+          </div>
+          <div>
+            <label className='block text-gray-700 font-semibold mb-2'>Description</label>
+            <textarea
+              placeholder='Enter task description'
+              value={taskForm.description}
+              onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })}
+              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none h-20'
+            />
+          </div>
+          <button
+            type='submit'
+            className='w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition'
+          >
+            Create Task
+          </button>
+        </form>
+      </div>
 
-            <button className='w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition'>
-              Assign Task
-            </button>
-          </form>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-4 gap-4 mb-8">
+        <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200 rounded-lg p-6">
+          <p className="text-gray-600 text-sm font-semibold mb-1">Total Tasks</p>
+          <p className="text-3xl font-bold text-indigo-600">{stats.total}</p>
         </div>
+        <div className="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-lg p-6">
+          <p className="text-gray-600 text-sm font-semibold mb-1">Pending</p>
+          <p className="text-3xl font-bold text-red-600">{stats.pending}</p>
+        </div>
+        <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-lg p-6">
+          <p className="text-gray-600 text-sm font-semibold mb-1">In Progress</p>
+          <p className="text-3xl font-bold text-yellow-600">{stats.inProgress}</p>
+        </div>
+        <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-6">
+          <p className="text-gray-600 text-sm font-semibold mb-1">Completed</p>
+          <p className="text-3xl font-bold text-green-600">{stats.completed}</p>
+        </div>
+      </div>
 
-        {/* Right: List of all tasks */}
-        <div className='bg-white rounded-lg shadow-lg p-6'>
-          <h2 className='text-2xl font-bold mb-6 text-gray-800 border-b pb-4'>📋 All Tasks ({tasks.length})</h2>
-          {/* List all tasks assigned by admin */}
-          <div className='space-y-4 max-h-96 overflow-y-auto'>
-            {tasks.length > 0 ? (
-              tasks.map(t => (
-                <div key={t._id} className='border border-gray-200 rounded-lg p-4 hover:shadow-md transition'>
-                  {/* Task title and description */}
-                  <h3 className='font-bold text-lg text-gray-800'>{t.title}</h3>
-                  <p className='text-gray-600 text-sm mt-1'>{t.description}</p>
-                  <p className='text-gray-500 text-sm mt-2'>Assigned to: <span className='font-semibold text-blue-600'>{t.assignedTo?.name || t.assignedTo?.email || 'N/A'}</span></p>
-                  {/* Link to view task details */}
-                  <Link to={`/task/${t._id}`} className='inline-block mt-3 text-blue-600 hover:text-blue-800 font-semibold'>→ View Details</Link>
-                </div>
-              ))
-            ) : (
-              <p className='text-gray-500 text-center py-8'>No tasks yet. Create one above!</p>
-            )}
+      {/* Filter and Search */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-gray-700 font-semibold mb-2">Filter by Status</label>
+            <select 
+              value={statusFilter} 
+              onChange={(e) => setStatusFilter(e.target.value)} 
+              className='w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500'
+            >
+              <option value="all">All Tasks ({stats.total})</option>
+              <option value="pending">Pending ({stats.pending})</option>
+              <option value="in progress">In Progress ({stats.inProgress})</option>
+              <option value="completed">Completed ({stats.completed})</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-gray-700 font-semibold mb-2">Search Tasks</label>
+            <input 
+              type="text"
+              placeholder="Search by title or description..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className='w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500'
+            />
           </div>
         </div>
       </div>
-    </div>
-  )
-}
 
-export default AdminDashboard
+      {/* Tasks list */}
+      {loading ? (
+        <div className='text-center py-12'>
+          <p className='text-gray-500 text-lg'>Loading tasks...</p>
+        </div>
+      ) : (
+        <div className='space-y-4'>
+          {filteredTasks.length > 0 ? (
+            filteredTasks.map(task => (
+              <div className='bg-white border border-gray-200 rounded-lg shadow hover:shadow-lg transition p-6' key={task._id}>
+                {/* Task Header */}
+                <div className='flex justify-between items-start mb-4'>
+                  <div className="flex-1">
+                    <h2 className='text-2xl font-bold text-gray-800'>{task.title}</h2>
+                    <p className='text-gray-600 mt-2'>{task.description}</p>
+                  </div>
+                  <span className={`px-4 py-2 rounded-full font-semibold text-sm whitespace-nowrap ml-4 ${
+                    task.status === 'completed' ? 'bg-green-100 text-green-800' :
+                    task.status === 'in progress' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>{task.status?.toUpperCase() || 'OPEN'}</span>
+                </div>
+
+                {/* Task Info */}
+                <div className="grid grid-cols-4 gap-4 mb-4 pb-4 border-b text-sm">
+                  <div>
+                    <p className="text-gray-600 font-semibold">Assigned To:</p>
+                    <p className="text-gray-800">{task.assignedTo?.name || task.assignedTo?.email || 'Unassigned'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 font-semibold">Created By:</p>
+                    <p className="text-gray-800">{task.createdBy?.name || task.createdBy?.email || 'Unknown'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 font-semibold">Created:</p>
+                    <p className="text-gray-800">{new Date(task.createdAt || Date.now()).toLocaleDateString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 font-semibold">Priority:</p>
+                    <p className="text-gray-800">{task.priority || 'Medium'}</p>
+                  </div>
+                </div>
+
+                {/* Update Status & View Details */}
+                <div className="mb-6 flex gap-2 flex-wrap items-center">
+                  <button 
+                    onClick={() => updateStatus(task._id, "in progress")} 
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition font-semibold"
+                  >
+                    📊 Start
+                  </button>
+                  <button 
+                    onClick={() => updateStatus(task._id, "completed")} 
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition font-semibold"
+                  >
+                    ✓ Complete
+                  </button>
+                  {task.status !== 'open' && (
+                    <button 
+                      onClick={() => updateStatus(task._id, "open")} 
+                      className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition font-semibold"
+                    >
+                      ↩ Reopen
+                    </button>
+                  )}
+                  <div className="ml-auto">
+                    <Link to={`/task/${task._id}`} className='text-indigo-600 hover:text-indigo-800 font-semibold underline'>
+                      Open Full Details Page
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Comments Section */}
+                <div className='border-t pt-4 mb-4'>
+                  <h3 className='font-bold text-gray-800 mb-3'>💬 Comments ({task.comments?.length || 0})</h3>
+                  
+                  {/* Comments List */}
+                  <div className='space-y-2 max-h-40 overflow-y-auto mb-3 bg-gray-50 p-3 rounded'>
+                    {task.comments?.length > 0 ? (
+                      task.comments.map((c, i) => (
+                        <div key={i} className='text-sm bg-white p-3 rounded border-l-4 border-indigo-500'>
+                          <div className="flex justify-between items-start">
+                            <p className='font-semibold text-gray-800'>{c.createdBy?.name || 'Anonymous'}</p>
+                            <span className='text-xs text-gray-500'>{new Date(c.createdAt).toLocaleString()}</span>
+                          </div>
+                          <p className='text-gray-700 mt-1'>{c.text}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className='text-gray-500 text-sm text-center py-2'>No comments yet</p>
+                    )}
+                  </div>
+
+                  {/* Add Comment */}
+                  <div className='flex gap-2'>
+                    <input
+                      type="text"
+                      placeholder="Add a comment as Admin..."
+                      value={commentInputs[task._id] || ""}
+                      onChange={(e) => setCommentInputs({ ...commentInputs, [task._id]: e.target.value })}
+                      onKeyPress={(e) => e.key === 'Enter' && handleCommentSubmit(task._id)}
+                      className='flex-1 border border-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm'
+                    />
+                    <button
+                      onClick={() => handleCommentSubmit(task._id)}
+                      className='bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition font-semibold'
+                    >
+                      Send
+                    </button>
+                  </div>
+                </div>
+
+                {/* History Section */}
+                {task.history && task.history.length > 0 && (
+                  <div className='border-t pt-4'>
+                    <h3 className='font-bold text-gray-800 mb-2'>📜 Recent Activity</h3>
+                    <div className='space-y-1 text-xs text-gray-600 max-h-24 overflow-y-auto'>
+                      {task.history.slice(0, 5).map((log, i) => (
+                        <p key={i} className="flex items-center gap-2">
+                          <span className="text-lg">•</span>
+                          <span><strong>{log.by?.name || 'System'}</strong> {log.action}</span>
+                          <span className="ml-auto text-gray-500">{new Date(log.at).toLocaleTimeString()}</span>
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <div className='text-center py-12 bg-white rounded-lg border border-gray-200'>
+              <p className='text-gray-500 text-lg'>🎉 No tasks found with the selected filter</p>
+              <p className='text-gray-400 mt-2'>{searchQuery ? 'Try adjusting your search' : 'Start by creating a new task!'}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AdminDashboard;

@@ -22,6 +22,7 @@ const ManagerDashboard = () => {
         const tasksResponse = await api.get('/tasks/manager');
         setTasks(tasksResponse.data);
         const usersResponse = await api.get('/users');
+        setUsers(usersResponse.data);
         clientLogger.info(LogTags.TASK_FETCH, 'Manager fetched tasks and users');
       } catch (error) {
         clientLogger.error(LogTags.TASK_FETCH, 'Error fetching data', error);

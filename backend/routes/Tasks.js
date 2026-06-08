@@ -23,7 +23,12 @@ router.get('/employee', auth, async (req, res) => {
 // GET /api/tasks/manager
 router.get('/manager', auth, async (req, res) => {
     try {
-        const tasks = await Task.find({ createdBy: req.user.id || req.user._id })
+        const tasks = await Task.find({ 
+            $or: [
+                { createdBy: req.user.id || req.user._id },
+                { assignedTo: req.user.id || req.user._id }
+            ]
+        })
             .populate('assignedTo', 'email name role')
             .populate('createdBy', 'email name role')
             .populate({ path: 'comments', populate: { path: 'createdBy', select: 'name' } });
